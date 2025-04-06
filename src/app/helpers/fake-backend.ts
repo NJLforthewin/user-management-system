@@ -20,39 +20,39 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
     return handleRoute();   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    function handleRoute() {
+        switch (true) {
+          case url.endsWith('/accounts/authenticate') && method === 'POST':
+            return authenticate();
+          case url.endsWith('/accounts/refresh-token') && method === 'POST':
+            return refreshToken();
+          case url.endsWith('/accounts/revoke-token') && method === 'POST':
+            return revokeToken();
+          case url.endsWith('/accounts/register') && method === 'POST':
+            return register();
+          case url.endsWith('/accounts/verify-email') && method === 'POST':
+            return verifyEmail();
+          case url.endsWith('/accounts/forgot-password') && method === 'POST':
+            return forgotPassword();
+          case url.endsWith('/accounts/validate-reset-token') && method === 'POST':
+            return validateResetToken();
+          case url.endsWith('/accounts/reset-password') && method === 'POST':
+            return resetPassword();
+          case url.endsWith('/accounts') && method === 'GET':
+            return getAccounts();
+          case url.match(/\/accounts\/\d+$/) && method === 'GET':
+            return getAccountById();
+          case url.endsWith('/accounts') && method === 'POST':
+            return createAccount();
+          case url.match(/\/accounts\/\d+$/) && method === 'PUT':
+            return updateAccount();
+          case url.match(/\/accounts\/\d+$/) && method === 'DELETE':
+            return deleteAccount();
+          default:
+            // pass through any requests not handled above
+            return next.handle(request);
+        }
+      }
 
     // route functions
 
