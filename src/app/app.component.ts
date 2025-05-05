@@ -16,6 +16,7 @@ import { filter } from 'rxjs/operators';
 export class AppComponent implements OnInit {
     account: any;
     Role = Role;
+    maintenanceMode = false;
 
     constructor(
         private accountService: AccountService,
@@ -30,15 +31,28 @@ export class AppComponent implements OnInit {
                 }
             }
         });
+        
+        // Subscribe to maintenance mode updates
+        this.accountService.maintenanceMode.subscribe(isInMaintenance => {
+            this.maintenanceMode = isInMaintenance;
+            if (isInMaintenance && !this.router.url.includes('/maintenance')) {
+                this.router.navigate(['/maintenance']);
+            }
+        });
     }
 
     ngOnInit() {
+        this.accountService.checkApiStatus().subscribe();
+        
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd)
         ).subscribe((event: NavigationEnd) => {
             console.log('Navigation completed:', event.url);
+            
+            if (this.maintenanceMode && !event.url.includes('/maintenance')) {
+                this.router.navigate(['/maintenance']);
+            }
         });
-
     }
 
     logout() {

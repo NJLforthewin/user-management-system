@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, finalize } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, finalize, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Account } from '../_models/account';
 
@@ -10,6 +10,10 @@ import { Account } from '../_models/account';
 export class AccountService {
     private accountSubject: BehaviorSubject<Account | null>;
     public account: Observable<Account | null>;
+    
+    // Add this for maintenance mode tracking
+    private maintenanceModeSubject = new BehaviorSubject<boolean>(false);
+    public maintenanceMode = this.maintenanceModeSubject.asObservable();
 
     constructor(
         private http: HttpClient,
@@ -28,6 +32,35 @@ export class AccountService {
 
     public get accountValue(): Account | null {
         return this.accountSubject.value;
+    }
+    
+    // Add this getter for maintenance mode status
+    public get isInMaintenanceMode(): boolean {
+        return this.maintenanceModeSubject.value;
+    }
+
+    // Add this method to check API status
+    checkApiStatus() {
+        return this.http.get<any>(`${environment.apiUrl}/api/status`)
+            .pipe(
+                tap(response => {
+                    const isMaintenanceMode = response.status === 'maintenance';
+                    this.maintenanceModeSubject.next(isMaintenanceMode);
+                    
+                    if (isMaintenanceMode) {
+                        this.router.navigate(['/maintenance']);
+                    }
+                    
+                    return response;
+                }),
+                catchError(error => {
+                    // If API is completely unreachable, assume maintenance mode
+                    console.error('API Status check failed', error);
+                    this.maintenanceModeSubject.next(true);
+                    this.router.navigate(['/maintenance']);
+                    return of({ status: 'maintenance' });
+                })
+            );
     }
 
     login(email: string, password: string) {
@@ -48,7 +81,7 @@ export class AccountService {
         
         this.router.navigate(['/account/login']);
     }
-
+    
     register(account: Account) {
         return this.http.post(`${environment.apiUrl}/accounts/register`, account);
     }
@@ -95,7 +128,6 @@ export class AccountService {
                 }
             }));
     }
-    
     
     update(id: string | number, params: any) {
         return this.http.put<Account>(`${environment.apiUrl}/accounts/${id}`, params)
