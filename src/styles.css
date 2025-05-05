@@ -11,3 +11,27 @@ body {
   text-align: center;
   box-sizing: content-box;
 }
+
+.badge.badge-active, .badge.badge-always-active {
+  background-color: #0dcaf0 !important; /* turquoise color */
+  color: #fff;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-weight: 500;
+}
+
+.badge.badge-pending {
+  background-color: #0d6efd !important; /* blue color */
+  color: #fff;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-weight: 500;
+}
+
+.badge.badge-approved {
+  background-color: #198754 !important; /* green color */
+  color: #fff;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-weight: 500;
+}

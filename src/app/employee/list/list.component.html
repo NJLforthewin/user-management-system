@@ -42,9 +42,9 @@
                                     <td>{{employee.department?.name || 'N/A'}}</td>
                                     <td>
                                         <span [ngClass]="{
-                                            'badge bg-success': employee.status === 'Active',
-                                            'badge bg-warning text-dark': employee.status === 'On Leave',
-                                            'badge bg-danger': employee.status === 'Terminated'
+                                            'badge rounded-pill bg-info': employee.status === 'Active',
+                                            'badge rounded-pill bg-warning text-dark': employee.status === 'On Leave',
+                                            'badge rounded-pill bg-danger': employee.status === 'Terminated'
                                         }">
                                             {{employee.status}}
                                         </span>
