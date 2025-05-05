@@ -19,9 +19,6 @@ app.get('/api/status', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
-
-const maintenancePagePath = path.join(__dirname, 'maintenance.html');
-
 app.use((req, res, next) => {
     if (req.path === '/api/status' || 
         req.path.startsWith('/api-docs') || 
