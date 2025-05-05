@@ -3,6 +3,8 @@ const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 const errorHandler = require('./_middleware/error-handler');
 const db = require('./_helpers/db');
 
@@ -17,6 +19,8 @@ app.get('/api/status', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+
+const maintenancePagePath = path.join(__dirname, 'maintenance.html');
 
 app.use((req, res, next) => {
     if (req.path === '/api/status' || 
@@ -38,91 +42,11 @@ app.use((req, res, next) => {
                 timestamp: new Date().toISOString()
             });
         } else {
-            return res.status(503).send(`
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Maintenance Mode</title>
-                    <style>
-                        body {
-                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                            background-color: #f5f7fa;
-                            color: #333;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100vh;
-                            margin: 0;
-                            padding: 20px;
-                            text-align: center;
-                        }
-                        .maintenance-container {
-                            background-color: white;
-                            border-radius: 8px;
-                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                            padding: 40px;
-                            max-width: 600px;
-                            width: 100%;
-                        }
-                        .maintenance-icon {
-                            font-size: 64px;
-                            margin-bottom: 20px;
-                        }
-                        h1 {
-                            color: #2b5797;
-                            margin-bottom: 10px;
-                        }
-                        p {
-                            color: #666;
-                            font-size: 18px;
-                            line-height: 1.6;
-                            margin-bottom: 30px;
-                        }
-                        .estimated-time {
-                            background-color: #f0f4f8;
-                            border-radius: 4px;
-                            padding: 10px 15px;
-                            display: inline-block;
-                            font-weight: 500;
-                            margin-bottom: 30px;
-                        }
-                        .refresh-button {
-                            background-color: #2b5797;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            padding: 12px 24px;
-                            font-size: 16px;
-                            cursor: pointer;
-                            transition: background-color 0.3s;
-                        }
-                        .refresh-button:hover {
-                            background-color: #1e3a6a;
-                        }
-                        .footer {
-                            margin-top: 30px;
-                            font-size: 14px;
-                            color: #999;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="maintenance-container">
-                        <div class="maintenance-icon">🛠️</div>
-                        <h1>System Maintenance</h1>
-                        <p>Our system is currently undergoing scheduled maintenance to improve your experience.</p>
-                        <div class="estimated-time">Estimated completion time: 30 minutes</div>
-                        <p>We apologize for any inconvenience this may cause. Thank you for your patience.</p>
-                        <button class="refresh-button" onclick="window.location.reload()">Refresh Page</button>
-                        <div class="footer">
-                            <p>Last updated: ${new Date().toLocaleString()}</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `);
+            if (fs.existsSync(maintenancePagePath)) {
+                return res.status(503).sendFile(maintenancePagePath);
+            } else {
+                return res.status(503).send('Service temporarily unavailable, maintenance in progress');
+            }
         }
     }
     
