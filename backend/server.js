@@ -13,9 +13,69 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+// Ensure public directory exists
+const publicDir = path.join(__dirname, 'public');
+if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
+}
 
-const maintenancePagePath = path.join(__dirname, 'public', 'maintenance.html');
+app.use(express.static(publicDir));
+
+const maintenancePagePath = path.join(publicDir, 'maintenance.html');
+
+// Create a simple maintenance.html file if it doesn't exist
+if (!fs.existsSync(maintenancePagePath)) {
+    const basicMaintenancePage = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>System Maintenance</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 40px;
+                    line-height: 1.6;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                }
+                h1 {
+                    color: #2b5797;
+                }
+                p {
+                    margin-bottom: 20px;
+                }
+                .btn {
+                    display: inline-block;
+                    background-color: #2b5797;
+                    color: white;
+                    padding: 10px 20px;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    margin-top: 20px;
+                    border: none;
+                    cursor: pointer;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>System Maintenance</h1>
+                <p>Our system is currently undergoing maintenance. We apologize for any inconvenience.</p>
+                <p>Estimated completion time: 30 minutes</p>
+                <button class="btn" onclick="window.location.reload()">Refresh Page</button>
+                <p style="margin-top: 20px; font-size: 0.9em; color: #666;">Last updated: ${new Date().toLocaleString()}</p>
+            </div>
+        </body>
+        </html>
+    `;
+    fs.writeFileSync(maintenancePagePath, basicMaintenancePage);
+}
 
 app.get('/api/status', (req, res) => {
     res.json({
@@ -44,11 +104,7 @@ app.use((req, res, next) => {
                 timestamp: new Date().toISOString()
             });
         } else {
-            if (fs.existsSync(maintenancePagePath)) {
-                return res.status(503).sendFile(maintenancePagePath);
-            } else {
-                return res.status(503).send('Service temporarily unavailable, maintenance in progress');
-            }
+            return res.status(503).sendFile(maintenancePagePath);
         }
     }
     
@@ -67,8 +123,7 @@ app.get('/accounts/verify-email', (req, res) => {
             res.send(`
                 <!DOCTYPE html>
                 <html>
-                <head>
-                    <title>Email Verification</title>
+                <head> <title>Email Verification</title>
                     <style>
                         body {       font-family: Arial, sans-serif;
                             text-align: center;
@@ -101,7 +156,8 @@ app.get('/accounts/verify-email', (req, res) => {
                     </div>
                 </body>
                 </html>
-            `);   })
+            `);   
+        })    
         .catch(error => res.status(400).send('Verification failed: ' + error));
 });
 
