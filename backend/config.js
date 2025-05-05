@@ -12,13 +12,13 @@ try {
       database: process.env.DB_NAME || 'node-mysql-signup-verification-api'
     },
     secret: process.env.JWT_SECRET || 'TcxtoIgRRbUqqgW174x1zAA==',
-    emailFrom: process.env.EMAIL_FROM || 'info@node-mysql-signup-verification-api.com',
+    emailFrom: process.env.EMAIL_FROM || 'johnchristiansancija0@gmail.com',
     smtpOptions: {
-      host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT) || 587,
       auth: {
-        user: process.env.SMTP_USER || 'ladarius66@ethereal.email',
-        pass: process.env.SMTP_PASS || 'HaCUhbSy1XEmTpTExr'
+        user: process.env.SMTP_USER || 'johnchristiansancija0@gmail.com',
+        pass: process.env.SMTP_PASS || 'cmzdnhabjdrdldlt'
       }
     }
   };
