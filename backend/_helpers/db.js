@@ -95,12 +95,46 @@ async function initialize() {
         
         db.isConnected = false;
         
-        db.Account = { findOne: () => null, create: () => null };
-        db.RefreshToken = { findOne: () => null, create: () => null };
-        db.Employee = { findOne: () => null, create: () => null };
-        db.Department = { findOne: () => null, findAll: () => [] };
-        db.Workflow = { findOne: () => null, create: () => null };
-        db.Request = { findOne: () => null, create: () => null };
-        db.RequestItem = { findOne: () => null, create: () => null };
+        class MockModel {
+            static findOne() { return Promise.resolve(null); }
+            static findAll() { return Promise.resolve([]); }
+            static create() { return Promise.resolve(null); }
+            static update() { return Promise.resolve([0]); }
+            static destroy() { return Promise.resolve(0); }
+            static count() { return Promise.resolve(0); }
+            static findByPk() { return Promise.resolve(null); }
+            
+            // Instance methods
+            constructor() {}
+            save() { return Promise.resolve(this); }
+            update() { return Promise.resolve(this); }
+            destroy() { return Promise.resolve(this); }
+        }
+        
+        db.Account = MockModel;
+        db.RefreshToken = MockModel;
+        db.Employee = MockModel;
+        db.Department = MockModel;
+        db.Workflow = MockModel;
+        db.Request = MockModel;
+        db.RequestItem = MockModel;
+        
+        db.sequelize = {
+            transaction: (fn) => Promise.resolve(fn({ commit: () => Promise.resolve(), rollback: () => Promise.resolve() })),
+            literal: (val) => val,
+            Op: {
+                eq: Symbol('eq'),
+                ne: Symbol('ne'),
+                gte: Symbol('gte'),
+                gt: Symbol('gt'),
+                lte: Symbol('lte'),
+                lt: Symbol('lt'),
+                in: Symbol('in'),
+                notIn: Symbol('notIn'),
+                is: Symbol('is'),
+                like: Symbol('like'),
+                notLike: Symbol('notLike')
+            }
+        };
     }
 }

@@ -4,11 +4,41 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const errorHandler = require('./_middleware/error-handler');
+const db = require('./_helpers/db');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
+
+// Add status endpoint to check API health
+app.get('/api/status', (req, res) => {
+    res.json({
+        status: db.isConnected ? 'online' : 'maintenance',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Add database maintenance mode middleware
+app.use((req, res, next) => {
+    // Skip for status endpoints, static resources, and email verification
+    if (req.path === '/api/status' || 
+        req.path.startsWith('/api-docs') || 
+        req.path === '/accounts/verify-email' ||
+        req.path === '/account/verify-email') {
+        return next();
+    }
+    
+    // If database is not connected, return maintenance mode response
+    if (!db.isConnected) {
+        return res.status(503).json({ 
+            message: 'Service temporarily unavailable, maintenance in progress', 
+            status: 'maintenance' 
+        });
+    }
+    
+    next();
+});
 
 app.get('/accounts/verify-email', (req, res) => {
     const token = req.query.token;
@@ -25,8 +55,7 @@ app.get('/accounts/verify-email', (req, res) => {
                 <head>
                     <title>Email Verification</title>
                     <style>
-                        body {
-                            font-family: Arial, sans-serif;
+                        body {       font-family: Arial, sans-serif;
                             text-align: center;
                             padding: 40px;
                             line-height: 1.6;
@@ -57,8 +86,7 @@ app.get('/accounts/verify-email', (req, res) => {
                     </div>
                 </body>
                 </html>
-            `);
-        })
+            `);   })
         .catch(error => res.status(400).send('Verification failed: ' + error));
 });
 
