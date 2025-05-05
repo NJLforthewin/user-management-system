@@ -13,13 +13,23 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
 
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Define path to maintenance page
+const maintenancePagePath = path.join(__dirname, 'public', 'maintenance.html');
+
+// Add status endpoint to check API health
 app.get('/api/status', (req, res) => {
     res.json({
         status: db.isConnected ? 'online' : 'maintenance',
         timestamp: new Date().toISOString()
     });
 });
+
+// Add database maintenance mode middleware
 app.use((req, res, next) => {
+    // Skip for status endpoints, static resources, and email verification
     if (req.path === '/api/status' || 
         req.path.startsWith('/api-docs') || 
         req.path === '/accounts/verify-email' ||
@@ -27,10 +37,13 @@ app.use((req, res, next) => {
         return next();
     }
     
+    // If database is not connected, return maintenance response
     if (!db.isConnected) {
+        // Check if request expects JSON or HTML
         const acceptHeader = req.headers.accept || '';
         
         if (acceptHeader.includes('application/json') || req.path.startsWith('/accounts/')) {
+            // JSON response for API requests
             return res.status(503).json({ 
                 message: 'Service temporarily unavailable, maintenance in progress', 
                 status: 'maintenance',
@@ -39,6 +52,7 @@ app.use((req, res, next) => {
                 timestamp: new Date().toISOString()
             });
         } else {
+            // HTML response for direct browser visits
             if (fs.existsSync(maintenancePagePath)) {
                 return res.status(503).sendFile(maintenancePagePath);
             } else {
@@ -50,6 +64,7 @@ app.use((req, res, next) => {
     next();
 });
 
+// Keep your existing email verification routes
 app.get('/accounts/verify-email', (req, res) => {
     const token = req.query.token;
     const origin = req.query.origin || 'http://localhost:4200';
@@ -104,6 +119,7 @@ app.get('/account/verify-email', (req, res) => {
     res.redirect(`/accounts/verify-email?token=${req.query.token}`);
 });
 
+// Your existing routes
 app.use('/accounts', require('./accounts/accounts.controller'));
 app.use('/employees', require('./employees/index'));
 app.use('/departments', require('./departments/index'));
