@@ -76,6 +76,7 @@ async function initialize() {
             } catch (error) {
                 retries--;
                 console.log(`Failed to connect to database. Retries left: ${retries}`);
+                console.log(`Connection error details: ${error.message}`);
                 if (retries === 0) throw error;
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
