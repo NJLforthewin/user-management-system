@@ -13,10 +13,19 @@ async function initialize() {
                 host: process.env.DB_HOST,
                 port: process.env.DB_PORT || 3306,
                 user: process.env.DB_USER,
-                password: process.env.DB_PASS,
+                password: process.env.DB_PASS || process.env.DB_PASSWORD, // Try both env var names
                 database: process.env.DB_NAME
             } 
             : config.database;
+        
+        console.log('NODE_ENV:', process.env.NODE_ENV);
+        console.log(`DB connection parameters:
+            Host: ${dbConfig.host}
+            Port: ${dbConfig.port}
+            User: ${dbConfig.user}
+            Database: ${dbConfig.database}
+            Password defined: ${dbConfig.password ? 'Yes' : 'No'}
+        `);
         
         if (process.env.NODE_ENV !== 'production') {
             try {
@@ -77,6 +86,8 @@ async function initialize() {
                 retries--;
                 console.log(`Failed to connect to database. Retries left: ${retries}`);
                 console.log(`Connection error details: ${error.message}`);
+                console.log(`Error code: ${error.code}`);
+                console.log(`Full error: ${JSON.stringify(error, null, 2)}`);
                 if (retries === 0) throw error;
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
@@ -119,34 +130,17 @@ async function initialize() {
         db.isConnected = true;
 
     } catch (error) {
-        console.error('Database initialization error:', error);
-        console.log('Running in maintenance mode without database connection');
+        console.error('==========================================');
+        console.error('DATABASE INITIALIZATION ERROR');
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
+        console.error('Error stack:', error.stack);
+        console.error('==========================================');
         
+        // Set isConnected to false but don't set up maintenance mode
         db.isConnected = false;
         
-        class MockModel {
-            static findOne() { return Promise.resolve(null); }
-            static findAll() { return Promise.resolve([]); }
-            static create() { return Promise.resolve(null); }
-            static update() { return Promise.resolve([0]); }
-            static destroy() { return Promise.resolve(0); }
-            static count() { return Promise.resolve(0); }
-            static findByPk() { return Promise.resolve(null); }
-            
-            constructor() {}
-            save() { return Promise.resolve(this); }
-            update() { return Promise.resolve(this); }
-            destroy() { return Promise.resolve(this); }
-        }
-        
-        db.Account = MockModel;
-        db.RefreshToken = MockModel;
-        db.Employee = MockModel;
-        db.Department = MockModel;
-        db.Workflow = MockModel;
-        db.Request = MockModel;
-        db.RequestItem = MockModel;
-        
+        // Initialize sequelize with minimum functionality to prevent errors
         db.sequelize = {
             transaction: (fn) => Promise.resolve(fn({ commit: () => Promise.resolve(), rollback: () => Promise.resolve() })),
             literal: (val) => val,
@@ -164,5 +158,13 @@ async function initialize() {
                 notLike: Symbol('notLike')
             }
         };
+        
+        db.Account = { findOne: () => Promise.resolve(null) };
+        db.RefreshToken = { findOne: () => Promise.resolve(null) };
+        db.Employee = { findOne: () => Promise.resolve(null) };
+        db.Department = { findOne: () => Promise.resolve(null) };
+        db.Workflow = { findOne: () => Promise.resolve(null) };
+        db.Request = { findOne: () => Promise.resolve(null) };
+        db.RequestItem = { findOne: () => Promise.resolve(null) };
     }
 }

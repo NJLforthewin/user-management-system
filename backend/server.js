@@ -13,7 +13,6 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
 
-// Ensure public directory exists
 const publicDir = path.join(__dirname, 'public');
 if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
@@ -21,97 +20,47 @@ if (!fs.existsSync(publicDir)) {
 
 app.use(express.static(publicDir));
 
-const maintenancePagePath = path.join(publicDir, 'maintenance.html');
-
-// Create a simple maintenance.html file if it doesn't exist
-if (!fs.existsSync(maintenancePagePath)) {
-    const basicMaintenancePage = `
-        <!DOCTYPE html>
-        <html>
-        <head>  <title>System Maintenance</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    text-align: center;
-                    padding: 40px;
-                    line-height: 1.6;
-                }
-                .container {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    padding: 20px;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                }
-                h1 {
-                    color: #2b5797;
-                }
-                p {
-                    margin-bottom: 20px;
-                }
-                .btn {
-                    display: inline-block;
-                    background-color: #2b5797;
-                    color: white;
-                    padding: 10px 20px;
-                    text-decoration: none;
-                    border-radius: 4px;
-                    margin-top: 20px;
-                    border: none;
-                    cursor: pointer;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>System Maintenance</h1>
-                <p>Our system is currently undergoing maintenance. We apologize for any inconvenience.</p>
-                <p>Estimated completion time: 30 minutes</p>
-                <button class="btn" onclick="window.location.reload()">Refresh Page</button>
-                <p style="margin-top: 20px; font-size: 0.9em; color: #666;">Last updated: ${new Date().toLocaleString()}</p>
-            </div>
-        </body>
-        </html>
-    `;  fs.writeFileSync(maintenancePagePath, basicMaintenancePage);
-}
-
 app.get('/api/status', (req, res) => {
     res.json({
-        status: db.isConnected ? 'online' : 'maintenance',
+        status: db.isConnected ? 'online' : 'offline',
         timestamp: new Date().toISOString()
     });
 });
 
-app.use((req, res, next) => {
-    // Always proceed to the next middleware, ignoring db.isConnected
-    next();
-    
-    /* Original code commented out
-    if (req.path === '/api/status' || 
-        req.path.startsWith('/api-docs') || 
-        req.path === '/accounts/verify-email' ||
-        req.path === '/account/verify-email') {
-        return next();
-    }
-    
-    if (!db.isConnected) {
-        const acceptHeader = req.headers.accept || '';
-        
-        if (acceptHeader.includes('application/json') || req.path.startsWith('/accounts/')) {
-            return res.status(503).json({ 
-                message: 'Service temporarily unavailable, maintenance in progress', 
-                status: 'maintenance',
-                estimatedCompletion: '30 minutes',
-                details: 'Our database is currently undergoing maintenance. Please try again later.',
-                timestamp: new Date().toISOString()
-            });
-        } else {
-            return res.status(503).sendFile(maintenancePagePath);
-        }
-    }
-    
-    next();
-    */
+app.get('/', (req, res) => {
+    res.send(`
+        <html>
+        <head>
+            <title>User Management System API</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
+                h1 { color: #2b5797; }
+                .endpoint { background: #f4f4f4; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+                code { background: #e0e0e0; padding: 2px 4px; border-radius: 3px; }
+                .error { color: red; }
+                .success { color: green; }
+            </style>
+        </head>
+        <body>
+            <h1>User Management System API</h1>
+            <p>Environment: ${process.env.NODE_ENV || 'development'}</p>
+            <p>Database Connection: <span class="${db.isConnected ? 'success' : 'error'}">${db.isConnected ? 'Connected' : 'Not Connected'}</span></p>
+            <p>DB Host: ${process.env.DB_HOST || 'Not set'}</p>
+            <p>DB Name: ${process.env.DB_NAME || 'Not set'}</p>
+            <p>DB User: ${process.env.DB_USER || 'Not set'}</p>
+            <p>DB Password: ${process.env.DB_PASS ? 'Set' : process.env.DB_PASSWORD ? 'Set as DB_PASSWORD instead of DB_PASS' : 'Not set'}</p>
+            
+            <h2>Available endpoints:</h2>
+            <div class="endpoint"><code>/api/status</code> - API status</div>
+            <div class="endpoint"><code>/accounts</code> - User account management</div>
+            <div class="endpoint"><code>/employees</code> - Employee data endpoints</div>
+            <div class="endpoint"><code>/departments</code> - Department data endpoints</div>
+            <div class="endpoint"><code>/workflows</code> - Workflow management</div>
+            <div class="endpoint"><code>/requests</code> - Request processing</div>
+            <div class="endpoint"><code>/api-docs</code> - API documentation</div>
+        </body>
+        </html>
+    `);
 });
 
 app.get('/accounts/verify-email', (req, res) => {
@@ -125,7 +74,7 @@ app.get('/accounts/verify-email', (req, res) => {
         .then(() => {
             res.send(`
                 <!DOCTYPE html>
-                <html>
+                 <html>
                 <head> <title>Email Verification</title>
                     <style>
                         body {       font-family: Arial, sans-serif;
