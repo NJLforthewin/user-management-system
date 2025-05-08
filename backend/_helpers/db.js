@@ -87,7 +87,6 @@ async function initialize() {
                 console.log(`Failed to connect to database. Retries left: ${retries}`);
                 console.log(`Connection error details: ${error.message}`);
                 console.log(`Error code: ${error.code}`);
-                console.log(`Full error: ${JSON.stringify(error, null, 2)}`);
                 if (retries === 0) throw error;
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
@@ -137,10 +136,8 @@ async function initialize() {
         console.error('Error stack:', error.stack);
         console.error('==========================================');
         
-        // Set isConnected to false but don't set up maintenance mode
         db.isConnected = false;
         
-        // Initialize sequelize with minimum functionality to prevent errors
         db.sequelize = {
             transaction: (fn) => Promise.resolve(fn({ commit: () => Promise.resolve(), rollback: () => Promise.resolve() })),
             literal: (val) => val,
@@ -159,12 +156,27 @@ async function initialize() {
             }
         };
         
-        db.Account = { findOne: () => Promise.resolve(null) };
-        db.RefreshToken = { findOne: () => Promise.resolve(null) };
-        db.Employee = { findOne: () => Promise.resolve(null) };
-        db.Department = { findOne: () => Promise.resolve(null) };
-        db.Workflow = { findOne: () => Promise.resolve(null) };
-        db.Request = { findOne: () => Promise.resolve(null) };
-        db.RequestItem = { findOne: () => Promise.resolve(null) };
+        class MockModel {
+            static findOne() { return Promise.resolve(null); }
+            static findAll() { return Promise.resolve([]); }
+            static create() { return Promise.resolve(null); }
+            static update() { return Promise.resolve([0]); }
+            static destroy() { return Promise.resolve(0); }
+            static count() { return Promise.resolve(0); }
+            static findByPk() { return Promise.resolve(null); }
+            
+            constructor() {}
+            save() { return Promise.resolve(this); }
+            update() { return Promise.resolve(this); }
+            destroy() { return Promise.resolve(this); }
+        }
+        
+        db.Account = MockModel;
+        db.RefreshToken = MockModel;
+        db.Employee = MockModel;
+        db.Department = MockModel;
+        db.Workflow = MockModel;
+        db.Request = MockModel;
+        db.RequestItem = MockModel;
     }
 }
