@@ -221,12 +221,10 @@ async function update(id, params) {
 async function _delete(id) {
     const account = await getAccount(id);
     
-    // Prevent deletion for admin accounts
     if (account.role === Role.Admin) {
         throw 'Admin accounts cannot be deleted';
     }
     
-    // Perform hard delete from database
     await account.destroy();
     
     return { message: 'Account deleted successfully' };
@@ -272,7 +270,6 @@ function basicDetails(account) {
 
 async function sendVerificationEmail(account, origin) {
     let message;
-    // Use backend URL for verification
     const backendUrl = 'http://localhost:4000';
     const verifyUrl = `${backendUrl}/accounts/verify-email?token=${account.verificationToken}&origin=${encodeURIComponent(origin)}`;
     

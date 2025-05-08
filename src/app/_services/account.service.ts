@@ -10,8 +10,6 @@ import { Account } from '../_models/account';
 export class AccountService {
     private accountSubject: BehaviorSubject<Account | null>;
     public account: Observable<Account | null>;
-    
-    // Add this for maintenance mode tracking
     private maintenanceModeSubject = new BehaviorSubject<boolean>(false);
     public maintenanceMode = this.maintenanceModeSubject.asObservable();
 
@@ -33,13 +31,10 @@ export class AccountService {
     public get accountValue(): Account | null {
         return this.accountSubject.value;
     }
-    
-    // Add this getter for maintenance mode status
-    public get isInMaintenanceMode(): boolean {
+        public get isInMaintenanceMode(): boolean {
         return this.maintenanceModeSubject.value;
     }
 
-    // Add this method to check API status
     checkApiStatus() {
         return this.http.get<any>(`${environment.apiUrl}/api/status`)
             .pipe(
@@ -54,7 +49,6 @@ export class AccountService {
                     return response;
                 }),
                 catchError(error => {
-                    // If API is completely unreachable, assume maintenance mode
                     console.error('API Status check failed', error);
                     this.maintenanceModeSubject.next(true);
                     this.router.navigate(['/maintenance']);
