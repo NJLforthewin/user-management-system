@@ -10,23 +10,20 @@ import { AccountService } from '../_services/account.service';
 export class ErrorInterceptor implements HttpInterceptor {
     constructor(
         private accountService: AccountService,
-        private router: Router  // Add Router injection
+        private router: Router  
     ) {}
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         return next.handle(request).pipe(catchError(err => {
-            // Handle 401/403 as before
             if ([401, 403].includes(err.status) && this.accountService.accountValue) {
                 this.accountService.logout();
             }
 
-            // Add handling for maintenance mode (503)
             if (err.status === 503 && err.error?.status === 'maintenance') {
                 console.log('Maintenance mode detected, redirecting to maintenance page');
                 this.router.navigate(['/maintenance']);
             }
 
-            // Keep your existing error handling
             const error = err.error?.message || err.statusText;
             console.error(err);
             return throwError(() => error);

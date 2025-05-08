@@ -1,4 +1,3 @@
-// src/app/_services/alert.service.ts
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -29,17 +28,14 @@ export class AlertService {
         this.alert(new Alert({ ...options, type: AlertType.Warning, message }));
     }
 
-    // main alert method    
     alert(alert: Alert) {
         alert.id = alert.id || this.defaultId;
         this.subject.next(alert);
     }
 
-    // clear alerts
     clear(id = this.defaultId) {
         this.subject.next(new Alert({ id }));
     }
 }
 
-// src/app/_services/index.ts
 export * from './alert.service';

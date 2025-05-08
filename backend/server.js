@@ -28,8 +28,7 @@ if (!fs.existsSync(maintenancePagePath)) {
     const basicMaintenancePage = `
         <!DOCTYPE html>
         <html>
-        <head>
-            <title>System Maintenance</title>
+        <head>  <title>System Maintenance</title>
             <style>
                 body {
                     font-family: Arial, sans-serif;
@@ -73,8 +72,7 @@ if (!fs.existsSync(maintenancePagePath)) {
             </div>
         </body>
         </html>
-    `;
-    fs.writeFileSync(maintenancePagePath, basicMaintenancePage);
+    `;  fs.writeFileSync(maintenancePagePath, basicMaintenancePage);
 }
 
 app.get('/api/status', (req, res) => {
@@ -85,6 +83,10 @@ app.get('/api/status', (req, res) => {
 });
 
 app.use((req, res, next) => {
+    // Always proceed to the next middleware, ignoring db.isConnected
+    next();
+    
+    /* Original code commented out
     if (req.path === '/api/status' || 
         req.path.startsWith('/api-docs') || 
         req.path === '/accounts/verify-email' ||
@@ -109,6 +111,7 @@ app.use((req, res, next) => {
     }
     
     next();
+    */
 });
 
 app.get('/accounts/verify-email', (req, res) => {
@@ -157,8 +160,7 @@ app.get('/accounts/verify-email', (req, res) => {
                 </body>
                 </html>
             `);   
-        })    
-        .catch(error => res.status(400).send('Verification failed: ' + error));
+        })    .catch(error => res.status(400).send('Verification failed: ' + error));
 });
 
 app.get('/account/verify-email', (req, res) => {
