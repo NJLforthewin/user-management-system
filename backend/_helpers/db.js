@@ -40,15 +40,46 @@ async function initialize() {
                 host: dbConfig.host,
                 port: dbConfig.port,
                 dialect: 'mysql',
-                dialectOptions: process.env.NODE_ENV === 'production' ? {
-                    ssl: {
-                        rejectUnauthorized: false
-                    }
-                } : {}
+                logging: false,
+                dialectOptions: process.env.NODE_ENV === 'production' 
+                    ? {
+                        ssl: {
+                            rejectUnauthorized: false
+                        },
+                        connectTimeout: 60000, 
+                        supportBigNumbers: true,
+                        bigNumberStrings: true
+                    } 
+                    : {},
+                pool: {
+                    max: 5,
+                    min: 0,
+                    acquire: 60000, 
+                    idle: 10000
+                },
+                retry: {
+                    max: 5 
+                }
             }
         );
-
+        
         db.sequelize = sequelize;
+        
+        let retries = 5;
+        let authenticated = false;
+        
+        while (retries > 0 && !authenticated) {
+            try {
+                await sequelize.authenticate();
+                console.log('Database connection established successfully.');
+                authenticated = true;
+            } catch (error) {
+                retries--;
+                console.log(`Failed to connect to database. Retries left: ${retries}`);
+                if (retries === 0) throw error;
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+        }
         
         db.Account = require('../accounts/account.model')(sequelize);
         db.RefreshToken = require('../accounts/refresh-token.model')(sequelize);
@@ -81,14 +112,11 @@ async function initialize() {
             ? { alter: false } 
             : { alter: true };
         
-        await sequelize.authenticate();
-        console.log('Database connection established successfully.');
-        
         await sequelize.sync(syncOptions);
         console.log('Database synchronized successfully.');
         
         db.isConnected = true;
-        
+
     } catch (error) {
         console.error('Database initialization error:', error);
         console.log('Running in maintenance mode without database connection');
@@ -104,7 +132,6 @@ async function initialize() {
             static count() { return Promise.resolve(0); }
             static findByPk() { return Promise.resolve(null); }
             
-            // Instance methods
             constructor() {}
             save() { return Promise.resolve(this); }
             update() { return Promise.resolve(this); }
