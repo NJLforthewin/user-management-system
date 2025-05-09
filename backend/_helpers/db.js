@@ -46,30 +46,16 @@ async function initialize() {
             }
         }
         
-        // Create Sequelize instance with logging enabled
+        // Create simplified Sequelize instance
         console.log('Creating Sequelize instance...');
         const sequelize = new Sequelize(
-            dbConfig.database, 
-            dbConfig.user, 
-            dbConfig.password, 
-            { 
+            dbConfig.database,
+            dbConfig.user,
+            dbConfig.password,
+            {
                 host: dbConfig.host,
-                port: dbConfig.port,
                 dialect: 'mysql',
-                logging: console.log, 
-                dialectOptions: {
-                    connectTimeout: 60000,
-                    supportBigNumbers: true,
-                    bigNumberStrings: true,
-                    charset: 'utf8mb4',
-                    ssl: false
-                },
-                pool: {
-                    max: 2,
-                    min: 0,
-                    acquire: 30000,
-                    idle: 10000
-                }
+                logging: console.log  // Keep logging enabled to see SQL statements
             }
         );
         
@@ -77,19 +63,8 @@ async function initialize() {
         
         // Test the connection
         console.log('Attempting to authenticate database connection...');
-        try {
-            await sequelize.authenticate();
-            console.log('Database connection authenticated successfully!');
-        } catch (authError) {
-            console.error('Sequelize authentication error:', {
-                message: authError.message,
-                code: authError.code,
-                errno: authError.errno,
-                sqlState: authError.sqlState,
-                sqlMessage: authError.sqlMessage
-            });
-            throw authError; // rethrow to be caught by the outer catch block
-        }
+        await sequelize.authenticate();
+        console.log('Database connection authenticated successfully!');
         
         // Define models
         console.log('Defining models...');
@@ -138,17 +113,6 @@ async function initialize() {
             sqlState: error.sqlState,
             sqlMessage: error.sqlMessage
         });
-        
-        // Check specific MySQL error codes
-        if (error.code === 'ETIMEDOUT') {
-            console.error('Connection TIMED OUT. This typically indicates firewall or network issues.');
-        } else if (error.code === 'ECONNREFUSED') {
-            console.error('Connection REFUSED. This typically indicates the server is not accepting connections on that port.');
-        } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-            console.error('ACCESS DENIED. This typically indicates incorrect username or password.');
-        } else if (error.code === 'ER_BAD_DB_ERROR') {
-            console.error('BAD DB. This typically indicates the database does not exist.');
-        }
         
         console.error('Stack trace:', error.stack);
         
