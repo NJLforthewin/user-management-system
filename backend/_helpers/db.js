@@ -13,7 +13,7 @@ async function initialize() {
                 host: process.env.DB_HOST,
                 port: process.env.DB_PORT || 3306,
                 user: process.env.DB_USER,
-                password: process.env.DB_PASS || process.env.DB_PASSWORD, // Try both env var names
+                password: process.env.DB_PASS || process.env.DB_PASSWORD, 
                 database: process.env.DB_NAME
             } 
             : config.database;
@@ -55,89 +55,75 @@ async function initialize() {
                         ssl: {
                             rejectUnauthorized: false
                         },
-                        connectTimeout: 60000, 
+                        connectTimeout: 120000, // Increased timeout
                         supportBigNumbers: true,
                         bigNumberStrings: true
                     } 
                     : {},
                 pool: {
-                    max: 5,
+                    max: 3, // Reduced pool size
                     min: 0,
-                    acquire: 60000, 
-                    idle: 10000
-                },
-                retry: {
-                    max: 5 
+                    acquire: 120000, // Increased timeout
+                    idle: 20000
                 }
             }
         );
         
         db.sequelize = sequelize;
         
-        let retries = 5;
-        let authenticated = false;
-        
-        while (retries > 0 && !authenticated) {
-            try {
-                await sequelize.authenticate();
-                console.log('Database connection established successfully.');
-                authenticated = true;
-            } catch (error) {
-                retries--;
-                console.log(`Failed to connect to database. Retries left: ${retries}`);
-                console.log(`Connection error details: ${error.message}`);
-                console.log(`Error code: ${error.code}`);
-                if (retries === 0) throw error;
-                await new Promise(resolve => setTimeout(resolve, 5000));
-            }
+        // Single attempt to connect, no retries
+        try {
+            await sequelize.authenticate();
+            console.log('Database connection established successfully.');
+            
+            // Define models
+            db.Account = require('../accounts/account.model')(sequelize);
+            db.RefreshToken = require('../accounts/refresh-token.model')(sequelize);
+            
+            db.Employee = require('../employees/employee.model')(sequelize);
+            db.Department = require('../departments/department.model')(sequelize);
+            db.Workflow = require('../workflows/workflow.model')(sequelize);
+            db.Request = require('../requests/request.model')(sequelize);
+            db.RequestItem = require('../requests/request-item.model')(sequelize);
+    
+            // Define relationships
+            db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
+            db.RefreshToken.belongsTo(db.Account);
+            
+            db.Account.hasOne(db.Employee);
+            db.Employee.belongsTo(db.Account);
+            
+            db.Department.hasMany(db.Employee);
+            db.Employee.belongsTo(db.Department);
+            
+            db.Employee.hasMany(db.Workflow);
+            db.Workflow.belongsTo(db.Employee);
+            
+            db.Employee.hasMany(db.Request);
+            db.Request.belongsTo(db.Employee);
+            
+            db.Request.hasMany(db.RequestItem, { onDelete: 'CASCADE' });
+            db.RequestItem.belongsTo(db.Request);
+    
+            // Sync database
+            const syncOptions = process.env.NODE_ENV === 'production' 
+                ? { alter: true } // Change to true to create tables in production
+                : { alter: true };
+            
+            await sequelize.sync(syncOptions);
+            console.log('Database synchronized successfully.');
+            
+            db.isConnected = true;
+        } catch (error) {
+            throw error; // Re-throw to be caught by the outer catch block
         }
-        
-        db.Account = require('../accounts/account.model')(sequelize);
-        db.RefreshToken = require('../accounts/refresh-token.model')(sequelize);
-        
-        db.Employee = require('../employees/employee.model')(sequelize);
-        db.Department = require('../departments/department.model')(sequelize);
-        db.Workflow = require('../workflows/workflow.model')(sequelize);
-        db.Request = require('../requests/request.model')(sequelize);
-        db.RequestItem = require('../requests/request-item.model')(sequelize);
-
-        db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
-        db.RefreshToken.belongsTo(db.Account);
-        
-        db.Account.hasOne(db.Employee);
-        db.Employee.belongsTo(db.Account);
-        
-        db.Department.hasMany(db.Employee);
-        db.Employee.belongsTo(db.Department);
-        
-        db.Employee.hasMany(db.Workflow);
-        db.Workflow.belongsTo(db.Employee);
-        
-        db.Employee.hasMany(db.Request);
-        db.Request.belongsTo(db.Employee);
-        
-        db.Request.hasMany(db.RequestItem, { onDelete: 'CASCADE' });
-        db.RequestItem.belongsTo(db.Request);
-
-        const syncOptions = process.env.NODE_ENV === 'production' 
-            ? { alter: false } 
-            : { alter: true };
-        
-        await sequelize.sync(syncOptions);
-        console.log('Database synchronized successfully.');
-        
-        db.isConnected = true;
 
     } catch (error) {
-        console.error('==========================================');
-        console.error('DATABASE INITIALIZATION ERROR');
-        console.error('Error message:', error.message);
-        console.error('Error code:', error.code);
-        console.error('Error stack:', error.stack);
-        console.error('==========================================');
+        console.error('Database initialization error:', error.message);
         
         db.isConnected = false;
         
+        // Initialize sequelize with minimum functionality
         db.sequelize = {
             transaction: (fn) => Promise.resolve(fn({ commit: () => Promise.resolve(), rollback: () => Promise.resolve() })),
             literal: (val) => val,
@@ -156,6 +142,7 @@ async function initialize() {
             }
         };
         
+        // Create mock models with all required methods
         class MockModel {
             static findOne() { return Promise.resolve(null); }
             static findAll() { return Promise.resolve([]); }
@@ -171,6 +158,7 @@ async function initialize() {
             destroy() { return Promise.resolve(this); }
         }
         
+        // Initialize all models with the MockModel class
         db.Account = MockModel;
         db.RefreshToken = MockModel;
         db.Employee = MockModel;
