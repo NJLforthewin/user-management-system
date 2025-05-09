@@ -7,6 +7,9 @@ module.exports = db = {};
 initialize();
 
 async function initialize() {
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('Starting database initialization...');
+    
     try {
         // Set database config based on environment
         const dbConfig = process.env.NODE_ENV === 'production' 
@@ -19,10 +22,17 @@ async function initialize() {
             } 
             : config.database;
         
+        console.log('DB Host:', dbConfig.host);
+        console.log('DB Port:', dbConfig.port);
+        console.log('DB User:', dbConfig.user);
+        console.log('DB Name:', dbConfig.database);
+        console.log('DB Password defined:', dbConfig.password ? 'Yes' : 'No');
+        
         console.log('Connecting to database...');
         
         if (process.env.NODE_ENV !== 'production') {
             try {
+                console.log('Creating database if it does not exist (development only)...');
                 const connection = await mysql.createConnection({ 
                     host: dbConfig.host, 
                     port: dbConfig.port, 
@@ -30,12 +40,14 @@ async function initialize() {
                     password: dbConfig.password 
                 });
                 await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`);
+                console.log('Database creation check completed');
             } catch (error) {
-                console.error('Failed to create database');
+                console.error('Failed to create database:', error.message);
             }
         }
         
         // Create Sequelize instance with logging enabled
+        console.log('Creating Sequelize instance...');
         const sequelize = new Sequelize(
             dbConfig.database, 
             dbConfig.user, 
@@ -44,7 +56,7 @@ async function initialize() {
                 host: dbConfig.host,
                 port: dbConfig.port,
                 dialect: 'mysql',
-                logging: console.log, // Enable SQL logging - THIS IS THE KEY CHANGE
+                logging: console.log, 
                 dialectOptions: {
                     connectTimeout: 60000,
                     supportBigNumbers: true,
@@ -64,10 +76,23 @@ async function initialize() {
         db.sequelize = sequelize;
         
         // Test the connection
-        await sequelize.authenticate();
-        console.log('Database connection authenticated.');
+        console.log('Attempting to authenticate database connection...');
+        try {
+            await sequelize.authenticate();
+            console.log('Database connection authenticated successfully!');
+        } catch (authError) {
+            console.error('Sequelize authentication error:', {
+                message: authError.message,
+                code: authError.code,
+                errno: authError.errno,
+                sqlState: authError.sqlState,
+                sqlMessage: authError.sqlMessage
+            });
+            throw authError; // rethrow to be caught by the outer catch block
+        }
         
         // Define models
+        console.log('Defining models...');
         db.Account = require('../accounts/account.model')(sequelize);
         db.RefreshToken = require('../accounts/refresh-token.model')(sequelize);
         db.Employee = require('../employees/employee.model')(sequelize);
@@ -77,6 +102,7 @@ async function initialize() {
         db.RequestItem = require('../requests/request-item.model')(sequelize);
 
         // Define relationships
+        console.log('Setting up model relationships...');
         db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
         db.RefreshToken.belongsTo(db.Account);
         
@@ -96,15 +122,38 @@ async function initialize() {
         db.RequestItem.belongsTo(db.Request);
 
         // Sync database
+        console.log('Synchronizing database schema...');
         const syncOptions = { alter: true }; // Create tables if they don't exist
         await sequelize.sync(syncOptions);
-        console.log('Database synchronized.');
+        console.log('Database synchronized successfully.');
         
         db.isConnected = true;
+        console.log('Database initialization completed successfully.');
 
     } catch (error) {
-        console.error('Database initialization error:', error.message);
+        console.error('Database initialization error. Details:', {
+            message: error.message,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
+        });
+        
+        // Check specific MySQL error codes
+        if (error.code === 'ETIMEDOUT') {
+            console.error('Connection TIMED OUT. This typically indicates firewall or network issues.');
+        } else if (error.code === 'ECONNREFUSED') {
+            console.error('Connection REFUSED. This typically indicates the server is not accepting connections on that port.');
+        } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+            console.error('ACCESS DENIED. This typically indicates incorrect username or password.');
+        } else if (error.code === 'ER_BAD_DB_ERROR') {
+            console.error('BAD DB. This typically indicates the database does not exist.');
+        }
+        
+        console.error('Stack trace:', error.stack);
+        
         db.isConnected = false;
+        console.log('Setting up mock database functionality for graceful degradation...');
         
         // Create basic mock functionality to prevent crashes
         db.sequelize = {
