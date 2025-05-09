@@ -46,7 +46,6 @@ async function initialize() {
             }
         }
         
-        // Create simplified Sequelize instance
         console.log('Creating Sequelize instance...');
         const sequelize = new Sequelize(
             dbConfig.database,
@@ -55,18 +54,16 @@ async function initialize() {
             {
                 host: dbConfig.host,
                 dialect: 'mysql',
-                logging: console.log  // Keep logging enabled to see SQL statements
+                logging: console.log  
             }
         );
         
         db.sequelize = sequelize;
         
-        // Test the connection
         console.log('Attempting to authenticate database connection...');
         await sequelize.authenticate();
         console.log('Database connection authenticated successfully!');
         
-        // Define models
         console.log('Defining models...');
         db.Account = require('../accounts/account.model')(sequelize);
         db.RefreshToken = require('../accounts/refresh-token.model')(sequelize);
