@@ -8,24 +8,18 @@ initialize();
 
 async function initialize() {
     try {
+        // Set database config based on environment
         const dbConfig = process.env.NODE_ENV === 'production' 
             ? {
                 host: process.env.DB_HOST,
-                port: process.env.DB_PORT || 3306,
+                port: parseInt(process.env.DB_PORT || '3306', 10),
                 user: process.env.DB_USER,
-                password: process.env.DB_PASS || process.env.DB_PASSWORD, 
+                password: process.env.DB_PASS || process.env.DB_PASSWORD,
                 database: process.env.DB_NAME
             } 
             : config.database;
         
-        console.log('NODE_ENV:', process.env.NODE_ENV);
-        console.log(`DB connection parameters:
-            Host: ${dbConfig.host}
-            Port: ${dbConfig.port}
-            User: ${dbConfig.user}
-            Database: ${dbConfig.database}
-            Password defined: ${dbConfig.password ? 'Yes' : 'No'}
-        `);
+        console.log('Connecting to database...');
         
         if (process.env.NODE_ENV !== 'production') {
             try {
@@ -37,10 +31,11 @@ async function initialize() {
                 });
                 await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`);
             } catch (error) {
-                console.error('Failed to create database:', error);
+                console.error('Failed to create database');
             }
         }
         
+        // Create Sequelize instance with logging enabled
         const sequelize = new Sequelize(
             dbConfig.database, 
             dbConfig.user, 
@@ -49,81 +44,69 @@ async function initialize() {
                 host: dbConfig.host,
                 port: dbConfig.port,
                 dialect: 'mysql',
-                logging: false,
-                dialectOptions: process.env.NODE_ENV === 'production' 
-                    ? {
-                        ssl: {
-                            rejectUnauthorized: false
-                        },
-                        connectTimeout: 120000, // Increased timeout
-                        supportBigNumbers: true,
-                        bigNumberStrings: true
-                    } 
-                    : {},
+                logging: console.log, // Enable SQL logging - THIS IS THE KEY CHANGE
+                dialectOptions: {
+                    connectTimeout: 60000,
+                    supportBigNumbers: true,
+                    bigNumberStrings: true,
+                    charset: 'utf8mb4',
+                    ssl: false
+                },
                 pool: {
-                    max: 3, // Reduced pool size
+                    max: 2,
                     min: 0,
-                    acquire: 120000, // Increased timeout
-                    idle: 20000
+                    acquire: 30000,
+                    idle: 10000
                 }
             }
         );
         
         db.sequelize = sequelize;
         
-        // Single attempt to connect, no retries
-        try {
-            await sequelize.authenticate();
-            console.log('Database connection established successfully.');
-            
-            // Define models
-            db.Account = require('../accounts/account.model')(sequelize);
-            db.RefreshToken = require('../accounts/refresh-token.model')(sequelize);
-            
-            db.Employee = require('../employees/employee.model')(sequelize);
-            db.Department = require('../departments/department.model')(sequelize);
-            db.Workflow = require('../workflows/workflow.model')(sequelize);
-            db.Request = require('../requests/request.model')(sequelize);
-            db.RequestItem = require('../requests/request-item.model')(sequelize);
-    
-            // Define relationships
-            db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
-            db.RefreshToken.belongsTo(db.Account);
-            
-            db.Account.hasOne(db.Employee);
-            db.Employee.belongsTo(db.Account);
-            
-            db.Department.hasMany(db.Employee);
-            db.Employee.belongsTo(db.Department);
-            
-            db.Employee.hasMany(db.Workflow);
-            db.Workflow.belongsTo(db.Employee);
-            
-            db.Employee.hasMany(db.Request);
-            db.Request.belongsTo(db.Employee);
-            
-            db.Request.hasMany(db.RequestItem, { onDelete: 'CASCADE' });
-            db.RequestItem.belongsTo(db.Request);
-    
-            // Sync database
-            const syncOptions = process.env.NODE_ENV === 'production' 
-                ? { alter: true } // Change to true to create tables in production
-                : { alter: true };
-            
-            await sequelize.sync(syncOptions);
-            console.log('Database synchronized successfully.');
-            
-            db.isConnected = true;
-        } catch (error) {
-            throw error; // Re-throw to be caught by the outer catch block
-        }
+        // Test the connection
+        await sequelize.authenticate();
+        console.log('Database connection authenticated.');
+        
+        // Define models
+        db.Account = require('../accounts/account.model')(sequelize);
+        db.RefreshToken = require('../accounts/refresh-token.model')(sequelize);
+        db.Employee = require('../employees/employee.model')(sequelize);
+        db.Department = require('../departments/department.model')(sequelize);
+        db.Workflow = require('../workflows/workflow.model')(sequelize);
+        db.Request = require('../requests/request.model')(sequelize);
+        db.RequestItem = require('../requests/request-item.model')(sequelize);
+
+        // Define relationships
+        db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
+        db.RefreshToken.belongsTo(db.Account);
+        
+        db.Account.hasOne(db.Employee);
+        db.Employee.belongsTo(db.Account);
+        
+        db.Department.hasMany(db.Employee);
+        db.Employee.belongsTo(db.Department);
+        
+        db.Employee.hasMany(db.Workflow);
+        db.Workflow.belongsTo(db.Employee);
+        
+        db.Employee.hasMany(db.Request);
+        db.Request.belongsTo(db.Employee);
+        
+        db.Request.hasMany(db.RequestItem, { onDelete: 'CASCADE' });
+        db.RequestItem.belongsTo(db.Request);
+
+        // Sync database
+        const syncOptions = { alter: true }; // Create tables if they don't exist
+        await sequelize.sync(syncOptions);
+        console.log('Database synchronized.');
+        
+        db.isConnected = true;
 
     } catch (error) {
         console.error('Database initialization error:', error.message);
-        
         db.isConnected = false;
         
-        // Initialize sequelize with minimum functionality
+        // Create basic mock functionality to prevent crashes
         db.sequelize = {
             transaction: (fn) => Promise.resolve(fn({ commit: () => Promise.resolve(), rollback: () => Promise.resolve() })),
             literal: (val) => val,
@@ -142,7 +125,7 @@ async function initialize() {
             }
         };
         
-        // Create mock models with all required methods
+        // Mock models
         class MockModel {
             static findOne() { return Promise.resolve(null); }
             static findAll() { return Promise.resolve([]); }
@@ -158,7 +141,7 @@ async function initialize() {
             destroy() { return Promise.resolve(this); }
         }
         
-        // Initialize all models with the MockModel class
+        // Initialize models with mock
         db.Account = MockModel;
         db.RefreshToken = MockModel;
         db.Employee = MockModel;
