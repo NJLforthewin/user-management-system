@@ -11,7 +11,6 @@ async function initialize() {
     console.log('Starting database initialization...');
     
     try {
-        // Set database config based on environment
         const dbConfig = process.env.NODE_ENV === 'production' 
             ? {
                 host: process.env.DB_HOST,
@@ -73,7 +72,6 @@ async function initialize() {
         db.Request = require('../requests/request.model')(sequelize);
         db.RequestItem = require('../requests/request-item.model')(sequelize);
 
-        // Define relationships
         console.log('Setting up model relationships...');
         db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
         db.RefreshToken.belongsTo(db.Account);
@@ -93,9 +91,9 @@ async function initialize() {
         db.Request.hasMany(db.RequestItem, { onDelete: 'CASCADE' });
         db.RequestItem.belongsTo(db.Request);
 
-        // Sync database
+       
         console.log('Synchronizing database schema...');
-        const syncOptions = { alter: true }; // Create tables if they don't exist
+        const syncOptions = { alter: true }; 
         await sequelize.sync(syncOptions);
         console.log('Database synchronized successfully.');
         
@@ -116,7 +114,6 @@ async function initialize() {
         db.isConnected = false;
         console.log('Setting up mock database functionality for graceful degradation...');
         
-        // Create basic mock functionality to prevent crashes
         db.sequelize = {
             transaction: (fn) => Promise.resolve(fn({ commit: () => Promise.resolve(), rollback: () => Promise.resolve() })),
             literal: (val) => val,
@@ -135,7 +132,6 @@ async function initialize() {
             }
         };
         
-        // Mock models
         class MockModel {
             static findOne() { return Promise.resolve(null); }
             static findAll() { return Promise.resolve([]); }
@@ -151,7 +147,6 @@ async function initialize() {
             destroy() { return Promise.resolve(this); }
         }
         
-        // Initialize models with mock
         db.Account = MockModel;
         db.RefreshToken = MockModel;
         db.Employee = MockModel;

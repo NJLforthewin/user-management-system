@@ -2,6 +2,10 @@ const { DataTypes } = require('sequelize');
 
 module.exports = model;
 
+const { DataTypes } = require('sequelize');
+
+module.exports = model;
+
 function model(sequelize) {
     const attributes = {
         email: { type: DataTypes.STRING, allowNull: false },
@@ -28,14 +32,14 @@ function model(sequelize) {
             }
         }
     };
-    
+
     const options = {
         timestamps: false,
         defaultScope: {
-        attributes: { exclude: ['passwordHash'] }
+            attributes: { exclude: ['passwordHash'] }
         },
         scopes: {
-        withHash: { attributes: {}, } 
+            withHash: { attributes: { include: ['passwordHash'] } }
         }
     };
     return sequelize.define('account', attributes, options);
