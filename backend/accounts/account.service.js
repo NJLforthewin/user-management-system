@@ -270,7 +270,11 @@ function basicDetails(account) {
 
 async function sendVerificationEmail(account, origin) {
     let message;
-    const backendUrl = 'http://localhost:4000';
+
+    const backendUrl = process.env.NODE_ENV === 'production'
+        ? 'https://user-management-sancija.onrender.com' 
+        : 'http://localhost:4000';
+    
     const verifyUrl = `${backendUrl}/accounts/verify-email?token=${account.verificationToken}&origin=${encodeURIComponent(origin)}`;
     
     message = `<p>Please click the below link to verify your email address:</p>
