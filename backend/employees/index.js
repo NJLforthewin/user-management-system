@@ -1,10 +1,10 @@
+
 const express = require('express');
 const router = express.Router();
 const db = require('../_helpers/db');
 const authorize = require('../_middleware/authorize');
 const Role = require('../_helpers/role');
 
-// Routes
 router.post('/', authorize(Role.Admin), create);
 router.get('/', authorize(), getAll);
 router.get('/:id', authorize(), getById);

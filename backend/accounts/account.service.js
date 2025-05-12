@@ -59,7 +59,6 @@ async function authenticate({ email, password, ipAddress }) {
         throw 'Your account has been deactivated. Please contact an administrator.';
     }
     
-    // Direct verification check as a backup
     if (account.verified || account.passwordReset) {
         console.log('Manually verifying account based on verified/passwordReset fields');
         account.isVerified = true;

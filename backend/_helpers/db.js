@@ -26,7 +26,6 @@ async function initialize() {
         console.log('DB User:', dbConfig.user);
         console.log('DB Name:', dbConfig.database);
         console.log('DB Password defined:', dbConfig.password ? 'Yes' : 'No');
-        
         console.log('Connecting to database...');
         
         if (process.env.NODE_ENV !== 'production') {
@@ -53,10 +52,13 @@ async function initialize() {
             {
                 host: dbConfig.host,
                 dialect: 'mysql',
-                logging: console.log  
+                logging: console.log,
+                dialectOptions: {
+                    supportBigNumbers: true,
+                    bigNumberStrings: true
+                }
             }
         );
-        
         db.sequelize = sequelize;
         
         console.log('Attempting to authenticate database connection...');
@@ -90,10 +92,14 @@ async function initialize() {
         
         db.Request.hasMany(db.RequestItem, { onDelete: 'CASCADE' });
         db.RequestItem.belongsTo(db.Request);
-
-       
+        
         console.log('Synchronizing database schema...');
-        const syncOptions = { alter: true }; 
+        
+        const syncOptions = { 
+            force: false,  
+            alter: false  
+        };
+        
         await sequelize.sync(syncOptions);
         console.log('Database synchronized successfully.');
         
@@ -140,6 +146,7 @@ async function initialize() {
             static destroy() { return Promise.resolve(0); }
             static count() { return Promise.resolve(0); }
             static findByPk() { return Promise.resolve(null); }
+            static scope() { return this; }
             
             constructor() {}
             save() { return Promise.resolve(this); }

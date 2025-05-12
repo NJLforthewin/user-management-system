@@ -131,7 +131,6 @@ async function startServer() {
 
         const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 4000;
         
-        // Start the server
         app.listen(port, () => {
             console.log('Server listening on port ' + port);
             console.log('Database connection status:', db.isConnected ? 'Connected' : 'Not Connected');
