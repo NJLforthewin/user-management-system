@@ -12,12 +12,12 @@ try {
       database: process.env.DB_NAME || 'u875409848_sancija'
     },
     secret: process.env.JWT_SECRET || 'TcxtoIgRRbUqqgW174x1zAA==',
-    emailFrom: process.env.EMAIL_FROM || 'johnchristiansancija0@gmail.com',
+    emailFrom: process.env.EMAIL_FROM || 'usermanagementsystem.sancija@gmail.com',
     smtpOptions: {
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT) || 587,
       auth: {
-        user: process.env.SMTP_USER || 'johnchristiansancija0@gmail.com',
+        user: process.env.SMTP_USER || 'usermanagementsystem.sancija@gmail.com',
         pass: process.env.SMTP_PASS || 'cmzdnhabjdrdldlt'
       }
     }
