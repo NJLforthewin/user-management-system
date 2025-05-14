@@ -21,8 +21,7 @@
                                 <i class="bi bi-info-circle me-2"></i>
                                 Transferring an employee will initiate a transfer workflow and update their department assignment.
                             </p>
-                        </div>
-                        
+                        </div> 
                         <div class="mb-4">
                             <h4>Employee Information</h4>
                             <div class="card bg-light">
@@ -49,17 +48,16 @@
                                     <div *ngIf="f.departmentId.errors.required">New Department is required</div>
                                 </div>
                             </div>
-                            
                             <div class="d-flex justify-content-between mt-4">
-                                <a routerLink="../details/{{employee.id}}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-1"></i>Back to Details
-                                </a>
-                                <button [disabled]="submitting" class="btn btn-primary">
-                                    <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
-                                    <i *ngIf="!submitting" class="bi bi-check-circle me-1"></i>
-                                    Transfer Employee
-                                </button>
-                            </div>
+    <button type="button" (click)="goBackToEmployees()" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Employees
+    </button>
+    <button type="submit" [disabled]="submitting" class="btn btn-primary">
+        <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+        <i *ngIf="!submitting" class="bi bi-check-circle me-1"></i>
+        Transfer Employee
+    </button>
+</div>
                         </form>
                     </div>
                 </div>
