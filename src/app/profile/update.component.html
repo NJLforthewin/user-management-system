@@ -86,7 +86,6 @@
                                         </button>
                                         <a routerLink="../" class="btn btn-outline-secondary">Cancel</a>
                                     </div>
-                                    <!-- Only show delete button for non-admin users -->
                                     <button *ngIf="account.role !== 'Admin'" type="button" (click)="onDelete()" [disabled]="deleting" class="btn btn-danger">
                                         <span *ngIf="deleting" class="spinner-border spinner-border-sm me-2"></span>
                                         <i *ngIf="!deleting" class="bi bi-trash me-2"></i>Delete Account

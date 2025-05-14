@@ -24,7 +24,7 @@ export const routes: Routes = [
     { path: 'department', loadChildren: departmentModule, canActivate: [AuthGuard], data: { roles: [Role.Admin] } },
     { path: 'workflow', loadChildren: workflowModule, canActivate: [AuthGuard], data: { roles: [Role.Admin] } },
     { path: 'request', loadChildren: requestModule, canActivate: [AuthGuard] },
-    { path: 'maintenance', component: MaintenanceComponent },  // Add this line
+    { path: 'maintenance', component: MaintenanceComponent },  
     { path: '**', redirectTo: 'home' }
 ];
 
