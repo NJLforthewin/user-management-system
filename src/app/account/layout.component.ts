@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+<<<<<<< HEAD
 import { Router } from '@angular/router';
 
 import { AccountService } from '@app/_services';
@@ -15,3 +16,13 @@ export class LayoutComponent {
         }
     }
 }
+=======
+import { RouterModule } from '@angular/router';
+
+@Component({
+    templateUrl: 'layout.component.html',
+    standalone: true,
+    imports: [RouterModule]
+})
+export class LayoutComponent {}
+>>>>>>> 650f93b9451382bfbc24bef93c62680c8442fe72

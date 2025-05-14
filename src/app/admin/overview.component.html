@@ -1,0 +1,105 @@
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>This section can only be accessed by administrators.
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- First Row -->
+        <div class="col-md-4 mb-4">
+            <div class="card border shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="icon-large text-primary mb-3">
+                        <i class="bi bi-people fs-1"></i>
+                    </div>
+                    <h5 class="card-title">User Management</h5>
+                    <p class="card-text">Add, edit, or remove user accounts from the system.</p>
+                    <a [routerLink]="['accounts']" class="btn btn-primary">
+                        <i class="bi bi-gear me-2"></i>Manage Accounts
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="icon-large text-primary mb-3">
+                        <i class="bi bi-person-badge fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Employee Management</h5>
+                    <p class="card-text">Manage employees, departments, and positions.</p>
+                    <a [routerLink]="['/employee']" class="btn btn-primary">
+                        <i class="bi bi-people-fill me-2"></i>Manage Employees
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="icon-large text-primary mb-3">
+                        <i class="bi bi-building fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Department Management</h5>
+                    <p class="card-text">Create and manage organizational departments.</p>
+                    <a [routerLink]="['/department']" class="btn btn-primary">
+                        <i class="bi bi-diagram-3 me-2"></i>Manage Departments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Row -->
+        <div class="col-md-4 mb-4">
+            <div class="card border shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="icon-large text-primary mb-3">
+                        <i class="bi bi-list-check fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Workflow Management</h5>
+                    <p class="card-text">Track and manage employee workflows and processes.</p>
+                    <a [routerLink]="['/workflow']" class="btn btn-primary">
+                        <i class="bi bi-kanban me-2"></i>Manage Workflows
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="icon-large text-primary mb-3">
+                        <i class="bi bi-clipboard-check fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Request Management</h5>
+                    <p class="card-text">Process and manage employee requests and approvals.</p>
+                    <a [routerLink]="['/request']" class="btn btn-primary">
+                        <i class="bi bi-inbox me-2"></i>Manage Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.icon-large {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+</style>

@@ -1,0 +1,108 @@
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0"><i class="bi bi-people me-2"></i>User Accounts</h2>
+                    <a routerLink="add" class="btn btn-sm btn-light">
+                        <i class="bi bi-plus-circle me-1"></i>Add Account
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 25%" class="ps-4">Name</th>
+                                    <th style="width: 25%">Email</th>
+                                    <th style="width: 15%">Role</th>
+                                    <th style="width: 15%">Status</th>
+                                    <th style="width: 20%" class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let account of accounts">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle-sm me-3">
+                                                <span class="initials-sm">{{account.firstName?.charAt(0)}}{{account.lastName?.charAt(0)}}</span>
+                                            </div>
+                                            <div>
+                                                {{account.title}} {{account.firstName}} {{account.lastName}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{account.email}}</td>
+                                    <td>
+                                        <span class="badge"
+                                              [ngClass]="{'bg-primary': account.role === 'Admin', 'bg-success': account.role === 'User'}">
+                                            {{account.role}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span *ngIf="account.role === 'Admin'" class="badge bg-info">Always Active</span>
+                                        <span *ngIf="account.role !== 'Admin'" class="badge"
+                                              [ngClass]="{'bg-success': account.isActive, 'bg-danger': !account.isActive}">
+                                            {{account.isActive ? 'Active' : 'Inactive'}}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a routerLink="edit/{{account.id}}" class="btn btn-sm btn-outline-primary me-1">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        
+                                        <button *ngIf="account.role !== 'Admin'" (click)="deleteAccount(account.id)" class="btn btn-sm btn-outline-danger me-1" 
+                                                [disabled]="account.isDeleting">
+                                            <span *ngIf="account.isDeleting" class="spinner-border spinner-border-sm"></span>
+                                            <i *ngIf="!account.isDeleting" class="bi bi-trash"></i>
+                                        </button>
+
+                                        <button *ngIf="account.role !== 'Admin'" (click)="toggleActivation(account)" 
+                                                class="btn btn-sm"
+                                                [ngClass]="{'btn-outline-success': !account.isActive, 'btn-outline-warning': account.isActive}"
+                                                [disabled]="account.isToggling">
+                                            <span *ngIf="account.isToggling" class="spinner-border spinner-border-sm"></span>
+                                            <i *ngIf="!account.isToggling" class="bi" 
+                                               [ngClass]="{'bi-check-circle': !account.isActive, 'bi-pause-circle': account.isActive}"></i>
+                                            {{account.isActive ? 'Deactivate' : 'Activate'}}
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="!accounts || accounts.length === 0">
+                                    <td colspan="5" class="text-center py-4">
+                                        <div *ngIf="!accounts" class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <div *ngIf="accounts?.length === 0">
+                                            <i class="bi bi-info-circle text-muted me-2"></i>
+                                            No accounts found
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle-sm {
+    width: 36px;
+    height: 36px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.initials-sm {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+</style>

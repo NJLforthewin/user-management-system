@@ -1,0 +1,45 @@
+<div class="maintenance-container">
+    <div class="maintenance-header">
+      <h1>System Maintenance</h1>
+      <p>We're working to make things better</p>
+    </div>
+    
+    <div class="maintenance-content">
+      <div class="maintenance-icon">
+        <i class="fas fa-tools"></i>
+      </div>
+      
+      <p>Our system is currently undergoing scheduled maintenance to improve reliability and performance. We apologize for any inconvenience this may cause.</p>
+      
+      <div class="status-container">
+        <div class="status-title">
+          <i class="fas fa-clock"></i>
+          <span>Maintenance Status</span>
+        </div>
+        
+        <div class="status-details">
+          <div class="status-item">
+            <div class="status-label">Status</div>
+            <div class="status-value">In Progress</div>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <div class="status-item">
+            <div class="status-label">Estimated Completion</div>
+            <div class="status-value">forever</div>
+          </div>
+        </div>
+      </div>
+      
+      <button class="refresh-button" [disabled]="refreshing" (click)="refresh()">
+        <span class="loading-spinner" *ngIf="refreshing"></span>
+        <i class="fas fa-sync-alt" *ngIf="!refreshing"></i>
+        {{ refreshing ? 'Checking status...' : 'Check Status' }}
+      </button>
+      
+      <div class="footer">
+        <p>Last updated: {{ currentTime }}</p>
+      </div>
+    </div>
+  </div>
