@@ -19,6 +19,7 @@ export class AddEditComponent implements OnInit {
     isAddMode!: boolean;
     loading = false;
     submitted = false;
+    account: any = null; // Store the account data for use in the template
     
     constructor(
         private formBuilder: UntypedFormBuilder,
@@ -48,20 +49,59 @@ export class AddEditComponent implements OnInit {
         if (!this.isAddMode) {
             this.accountService.getById(this.id!)
                 .pipe(first())
-                .subscribe(x => this.form.patchValue(x));
+                .subscribe(x => {
+                    this.account = x;
+                    this.form.patchValue(x);
+                });
         }
     }
     
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
+    
+    // Add these methods for activation and deletion
+    toggleActivation(account: any) {
+        if (confirm(`Are you sure you want to ${account.isActive ? 'deactivate' : 'activate'} this account?`)) {
+            this.loading = true;
+            const updatedData = { isActive: !account.isActive };
+            this.accountService.update(this.id!, updatedData)
+                .pipe(first())
+                .subscribe({
+                    next: () => {
+                        this.account.isActive = !this.account.isActive;
+                        this.alertService.success(`Account ${this.account.isActive ? 'activated' : 'deactivated'} successfully`);
+                        this.loading = false;
+                    },
+                    error: error => {
+                        this.alertService.error(error);
+                        this.loading = false;
+                    }
+                });
+        }
+    }
+    
+    deleteAccount() {
+        if (confirm('Are you sure you want to delete this account? This action cannot be undone.')) {
+            this.loading = true;
+            this.accountService.delete(this.id!)
+                .pipe(first())
+                .subscribe({
+                    next: () => {
+                        this.alertService.success('Account deleted successfully', { keepAfterRouteChange: true });
+                        this.router.navigate(['../../'], { relativeTo: this.route });
+                    },
+                    error: error => {
+                        this.alertService.error(error);
+                        this.loading = false;
+                    }
+                });
+        }
+    }
     
     onSubmit() {
         this.submitted = true;
         
-        // reset alerts on submit
         this.alertService.clear();
         
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }  
