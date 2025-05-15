@@ -154,7 +154,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             const refreshToken = getRefreshToken();
             const account = accounts.find((x: any) => x.refreshTokens.includes(refreshToken));
             
-            // revoke token and save
             account.refreshTokens = account.refreshTokens.filter((x: any) => x !== refreshToken);
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
 
@@ -165,7 +164,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             const account = body;
             
             if (accounts.find((x: any) => x.email === account.email)) {
-                // display email already registered "email" in alert
                 setTimeout(() => {
                     alertService.info(`
                         <h4>Email Already Registered</h4>
@@ -216,7 +214,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             if (!account) return error('Verification failed');
             
-            // set is verified flag to true if token is valid
             account.isVerified = true;
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
             
@@ -227,15 +224,12 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             const { email } = body;
             const account = accounts.find((x: any) => x.email === email);
             
-            // always return ok() response to prevent email enumeration
             if (!account) return ok({});
             
-            // create reset token that expires after 24 hours
             account.resetToken = new Date().getTime().toString();
             account.resetTokenExpires = new Date(Date.now() + 24*60*60*1000).toISOString();
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
 
-            // display password reset email in alert
             setTimeout(() => {
                 const resetUrl = `${location.origin}/account/reset-password?token=${account.resetToken}`;
                 alertService.info(`
@@ -270,7 +264,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             if (!account) return error('Invalid token');
             
-            // update password and remove reset token
             account.password = password;
             account.isVerified = true;
             delete account.resetToken;
@@ -290,7 +283,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
             let account = accounts.find((x: any) => x.id === idFromUrl());
             
-            // user accounts can get own profile and admin accounts can get all profiles
             if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
                 return unauthorized();
             }
@@ -306,7 +298,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                 return error(`Email ${account.email} is already registered`);
             }
             
-            // assign account id and a few other properties then save
             account.id = newAccountId();
             account.dateCreated = new Date().toISOString();
             account.isVerified = true;
@@ -324,19 +315,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             let params = body;
             let account = accounts.find((x: any) => x.id === idFromUrl());
             
-            // user accounts can update own profile and admin accounts can update all profiles
             if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
                 return unauthorized();
             }
             
-            // only update password if included
             if (!params.password) {
                 delete params.password;
             }
-            // don't save confirm password
             delete params.confirmPassword;
             
-            // update and save account
             Object.assign(account, params);
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
             
@@ -348,18 +335,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             let account = accounts.find((x: any) => x.id === idFromUrl());
             
-            // user accounts can delete own account and admin accounts can delete any account
             if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
                 return unauthorized();
             }
             
-            // delete account then save
             accounts = accounts.filter((x: any) => x.id !== idFromUrl());
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
             return ok({});
         }
 
-        // Department-related functions
         function getDepartments() {
             if (!isAuthenticated()) return unauthorized();
             return ok(departments);
@@ -381,7 +365,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const department = body;
             
-            // Check if department name already exists
             if (departments.find((x: any) => x.name.toLowerCase() === department.name.toLowerCase())) {
                 return error(`Department name '${department.name}' already exists`);
             }
@@ -403,7 +386,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const params = body;
             
-            // Check if department name already exists (excluding current department)
             if (params.name && 
                 departments.find((x: any) => x.id !== id && x.name.toLowerCase() === params.name.toLowerCase())) {
                 return error(`Department name '${params.name}' already exists`);
@@ -420,7 +402,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const id = idFromUrl();
             
-            // Check if department has employees
             if (employees.some((x: any) => x.departmentId === id)) {
                 return error('Cannot delete department with employees');
             }
@@ -431,11 +412,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return ok({});
         }
 
-        // Employee-related functions
         function getEmployees() {
             if (!isAuthenticated()) return unauthorized();
             
-            // Add account and department details to employees
             const employeesWithDetails = employees.map((employee: any) => {
                 return {
                     ...employee,
@@ -455,7 +434,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             if (!employee) return notFound();
             
-            // Add account and department details
             const employeeWithDetails = {
                 ...employee,
                 account: accounts.find((a: any) => a.id === employee.accountId),
@@ -470,11 +448,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const employee = body;
             
-            // Convert string ids to numbers
             employee.accountId = parseInt(employee.accountId);
             employee.departmentId = parseInt(employee.departmentId);
             
-            // Validate account and department exist
             if (!accounts.some((x: any) => x.id === employee.accountId)) {
                 return error('Account not found');
             }
@@ -483,12 +459,10 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                 return error('Department not found');
             }
             
-            // Check if account already has an employee record
             if (employees.some((x: any) => x.accountId === employee.accountId)) {
                 return error('Account already has an employee record');
             }
             
-            // Generate employee ID if not provided
             if (!employee.employeeId) {
                 employee.employeeId = 'EMP' + String(employees.length + 1).padStart(3, '0');
             }
@@ -499,7 +473,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             employees.push(employee);
             localStorage.setItem(employeesKey, JSON.stringify(employees));
             
-            // If this is a new employee, create an onboarding workflow
             const workflow = {
                 id: workflows.length ? Math.max(...workflows.map((x: any) => x.id)) + 1 : 1,
                 employeeId: employee.id,
@@ -525,11 +498,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const params = body;
             
-            // Convert string id to number if present
             if (params.departmentId) {
                 params.departmentId = parseInt(params.departmentId);
                 
-                // Validate department exists
                 if (!departments.some((x: any) => x.id === params.departmentId)) {
                     return error('Department not found');
                 }
@@ -552,21 +523,17 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             const { departmentId } = body;
             const targetDeptId = parseInt(departmentId);
             
-            // Validate department exists
             if (!departments.some((x: any) => x.id === targetDeptId)) {
                 return error('Department not found');
             }
             
-            // Don't transfer if already in this department
             if (employee.departmentId === targetDeptId) {
                 return error('Employee is already in this department');
             }
             
-            // Update employee department
             employee.departmentId = targetDeptId;
             localStorage.setItem(employeesKey, JSON.stringify(employees));
             
-            // Create a transfer workflow
             const workflow = {
                 id: workflows.length ? Math.max(...workflows.map((x: any) => x.id)) + 1 : 1,
                 employeeId: employee.id,
@@ -587,7 +554,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const id = idFromUrl();
             
-            // Check for related workflows and requests
             if (workflows.some((x: any) => x.employeeId === id)) {
                 return error('Cannot delete employee with workflows');
             }
@@ -602,7 +568,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return ok({});
         }
 
-        // Workflow-related functions
         function getWorkflows() {
             if (!isAuthenticated()) return unauthorized();
             
@@ -648,10 +613,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const workflow = body;
             
-            // Convert employee ID to number
             workflow.employeeId = parseInt(workflow.employeeId);
             
-            // Validate employee exists
             if (!employees.some((x: any) => x.id === workflow.employeeId)) {
                 return error('Employee not found');
             }
@@ -676,7 +639,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const params = body;
             
-            // Only allow updating status and description
             if (params.status) workflow.status = params.status;
             if (params.description !== undefined) workflow.description = params.description;
             
@@ -696,7 +658,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return ok({});
         }
 
-        // Request-related functions
         function getRequests() {
             if (!isAuthenticated()) return unauthorized();
             
@@ -712,7 +673,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                 };
             });
             
-            // Filter to only show admin's requests or user's own requests
             const currentUser = currentAccount();
             if (currentUser.role !== Role.Admin) {
                 const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
@@ -733,7 +693,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             if (!request) return notFound();
             
-            // Check if user is admin or the request belongs to the user
             const currentUser = currentAccount();
             if (currentUser.role !== Role.Admin) {
                 const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
@@ -761,19 +720,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             const request = body;
             
-            // Get the current employee based on the logged-in user
             const currentUser = currentAccount();
             const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
             
-            // If not admin, force employeeId to be the current user's employee ID
             if (currentUser.role !== Role.Admin) {
                 if (!currentEmployee) return error('No employee record found for your account');
                 request.employeeId = currentEmployee.id;
             } else if (request.employeeId) {
-                // Admin can specify an employee
                 request.employeeId = parseInt(request.employeeId);
                 
-                // Validate employee exists
                 if (!employees.some((x: any) => x.id === request.employeeId)) {
                     return error('Employee not found');
                 }
@@ -785,7 +740,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             request.status = 'Pending';
             request.created = new Date().toISOString();
             
-            // Handle request items if present
             if (request.requestItems && Array.isArray(request.requestItems)) {
                 request.requestItems.forEach((item: any, index: number) => {
                     item.id = index + 1;
@@ -807,7 +761,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             if (!request) return notFound();
             
-            // Check permissions
             const currentUser = currentAccount();
             if (currentUser.role !== Role.Admin) {
                 const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
@@ -815,13 +768,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                     return unauthorized();
                 }
                 
-                // Regular users can only update the description and request items
                 const params = {
                     description: body.description,
                     requestItems: body.requestItems
                 };
                 
-                // Update request items
                 if (params.requestItems && Array.isArray(params.requestItems)) {
                     params.requestItems.forEach((item: any, index: number) => {
                         if (!item.id) item.id = index + 1;
@@ -832,10 +783,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                 
                 if (params.description !== undefined) request.description = params.description;
             } else {
-                // Admins can update everything
                 const params = body;
                 
-                // Update request items if present
                 if (params.requestItems && Array.isArray(params.requestItems)) {
                     params.requestItems.forEach((item: any, index: number) => {
                         if (!item.id) item.id = index + 1;
@@ -845,7 +794,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                     delete params.requestItems;
                 }
                 
-                // Update other fields
                 Object.assign(request, params);
             }
             
@@ -862,7 +810,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             
             if (!request) return notFound();
             
-            // Check permissions
             const currentUser = currentAccount();
             if (currentUser.role !== Role.Admin) {
                 const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
@@ -877,17 +824,14 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return ok({});
         }
 
-        // helper functions
-
         function ok(body: any): Observable<HttpEvent<any>> {
             return of(new HttpResponse({ status: 200, body }))
-                .pipe(delay(500)); // delay observable to simulate server api call
+                .pipe(delay(500)); 
         }
 
         function error(message: string): Observable<never> {
             return throwError({ error: { message } })
                 .pipe(materialize(), delay(500), dematerialize());
-            // call materialize and dematerialize to ensure delay even if an error is thrown
         }
 
         function unauthorized(): Observable<never> {
@@ -930,7 +874,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         }
 
         function currentAccount() {
-            // check if jwt token is in auth header
             const authHeader = headers.get('Authorization');
             if (!authHeader?.startsWith('Bearer fake-jwt-token.')) return;
 
@@ -943,30 +886,26 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         }
 
         function getRefreshToken() {
-            // Check if token is in authorization header
             const refreshToken = headers.get('X-Refresh-Token');
             if (refreshToken) return refreshToken;
-            // If not in header, check if it's in the request body
             if (body && body.refreshToken) return body.refreshToken;
             
             return null;
         }
         
         function generateJwtToken(account: any): string {
-            // create token that expires in 15 minutes
             const tokenPayload = { 
-                exp: Math.round(new Date(Date.now() + 15 * 60 * 1000).getTime() / 1000), // expiration time in seconds
-                id: account.id // account ID
+                exp: Math.round(new Date(Date.now() + 15 * 60 * 1000).getTime() / 1000), 
+                id: account.id
             };
             return `fake-jwt-token.${btoa(JSON.stringify(tokenPayload))}`;
         }
 
         function generateRefreshToken() {
-            // Generate a simple timestamp-based token
             const token = new Date().getTime().toString();
             
             const expires = new Date(Date.now() + 7*24*60*60*1000).toISOString();
-            document.cookie = `fakeRefreshToken=${token}; expires=${expires}; path=/`; // 7 days expiration
+            document.cookie = `fakeRefreshToken=${token}; expires=${expires}; path=/`; 
             
             return token;
         }
@@ -978,7 +917,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 }
 
 export const fakeBackendProvider = {
-    // use fake backend in place of Http service for backend-less development
     provide: HTTP_INTERCEPTORS,
     useClass: FakeBackendInterceptor,
     multi: true

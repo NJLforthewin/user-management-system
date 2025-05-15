@@ -32,7 +32,6 @@ export class AppComponent implements OnInit {
             }
         });
         
-        // Subscribe to maintenance mode updates
         this.accountService.maintenanceMode.subscribe(isInMaintenance => {
             this.maintenanceMode = isInMaintenance;
             if (isInMaintenance && !this.router.url.includes('/maintenance')) {

@@ -7,12 +7,12 @@
     "database": "u875409848_cordova"
   },
   "secret": "TcxtoIgRRbUqagW174x1zAA==",
-  "emailFrom": "josephuserl15@gmail.com",
+  "emailFrom": "usermanagementsystem.sancija@gmail.com",
   "smtpOptions": {
     "host": "smtp.gmail.com",
     "port": 587,
     "auth": {
-      "user": "josephuserl15@gmail.com",
+      "user": "usermanagementsystem.sancija@gmail.com",
       "pass": "cwictbvkutbjbvrn"
     }
   }

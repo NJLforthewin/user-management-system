@@ -1,37 +1,23 @@
-<<<<<<< HEAD
-<h3 class="card-header">Login</h3>
-<div class="card-body">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-            <label>Email</label>
-            <input type="text" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.email.errors }"/>
-            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
-                <div *ngIf="f.email.errors.required">Email is required</div>
-                <div *ngIf="f.email.errors.email">Email is invalid</div>
-            </div>
-        </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }"/>
-            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
-                <div *ngIf="f.password.errors.required">Password is required</div>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col">
-                <button [disabled]="loading" class="btn btn-primary">
-                    <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
-                    Login
-                </button>
-                <a routerLink="../register" class="btn btn-link">Register</a>
-            </div>
-            <div class="form-group col text-right">
-                <a routerLink="../forgot-password" class="btn btn-link">Forgot Password?</a>
-            </div>
-        </div>
-    </form>
-=======
 <div class="container mt-5">
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <h5 class="text-primary mb-1">Int Prog Final Exam 2025</h5>
+                    <p class="text-muted mb-2">JOSEPHUS ERL CORDOVA EDP Code: 21006</p>
+                    
+                    <hr class="my-2">
+                    
+                    <ul class="list-unstyled mb-0 team-list">
+                        <li class="team-leader">SANCIJA, JOHN CHRISTIAN</li>
+                        <li>ALBURO, MARLOU</li>
+                        <li>CORDOVA, JOSEPHUS ERL</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
             <div class="card border-0 shadow-sm">
@@ -54,8 +40,7 @@
                             <div class="d-flex justify-content-between">
                                 <label class="form-label">Password</label>
                                 <a routerLink="../forgot-password" class="text-decoration-none">Forgot Password?</a>
-                            </div>
-                            <input type="password" formControlName="password" class="form-control" 
+                            </div>  <input type="password" formControlName="password" class="form-control" 
                                 placeholder="Enter your password" 
                                 [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
                             <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
@@ -78,5 +63,64 @@
             </div>
         </div>
     </div>
->>>>>>> 650f93b9451382bfbc24bef93c62680c8442fe72
 </div>
+
+
+style.less
+
+a { cursor: pointer; }
+
+.app-container {
+    min-height: 320px;
+}
+
+.admin-nav {
+    padding-top: 0;
+    padding-bottom: 0;
+    background-color: #e8e9ea;
+    border-bottom: 1px solid #ccc;
+}
+
+.btn-delete-account {
+    width: 40px;
+    text-align: center;
+    box-sizing: content-box;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus,
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    font-weight: 500;
+}
+
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.team-list {
+  margin: 0;
+  padding: 0;
+}
+
+.team-list li {
+  padding: 3px 0;
+  font-size: 14px;
+}
+
+.team-leader {
+  font-weight: 700;
+  color: #0d6efd;
+}

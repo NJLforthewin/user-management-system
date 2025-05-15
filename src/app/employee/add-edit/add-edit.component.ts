@@ -34,7 +34,6 @@ export class AddEditComponent implements OnInit {
         this.id = this.route.snapshot.params['id'];
         this.isAddMode = !this.id;
         
-        // Load departments
         this.loadDepartments();
         
         this.form = this.formBuilder.group({
@@ -54,7 +53,6 @@ export class AddEditComponent implements OnInit {
                 .pipe(first())
                 .subscribe(
                     employee => {
-                        // Format date as YYYY-MM-DD for input type="date"
                         const hireDate = employee.hireDate 
                             ? new Date(employee.hireDate).toISOString().split('T')[0]
                             : '';
@@ -83,16 +81,13 @@ export class AddEditComponent implements OnInit {
             );
     }
     
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
