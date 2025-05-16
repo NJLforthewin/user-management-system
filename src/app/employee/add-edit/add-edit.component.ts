@@ -37,7 +37,7 @@ export class AddEditComponent implements OnInit {
         this.isAddMode = !this.id;
         
         this.loadDepartments();
-        this.loadAccounts(); // Always load accounts for both add and edit modes
+        this.loadAccounts();
         
         this.form = this.formBuilder.group({
             employeeId: ['', [Validators.required, Validators.maxLength(20)]],
