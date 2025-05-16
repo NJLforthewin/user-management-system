@@ -1,11 +1,10 @@
 <div class="home-container">
   <div class="container py-4">
-    <!-- Welcome Card -->
     <div class="welcome-card bg-white shadow-sm rounded-4 p-4 mb-5 position-relative overflow-hidden">
       <div class="row align-items-center">
         <div class="col-lg-8">
           <h2 class="display-6 fw-bold text-primary mb-3">Hi {{account.firstName}}!</h2>
-          <p class="text-muted lead mb-4">Welcome to your Employee Management Dashboard</p>
+          <p class="text-muted lead mb-4">WELCOME!!</p>
         </div>
         <div class="col-lg-4 d-none d-lg-block text-end">
           <div class="welcome-illustration p-3">
@@ -14,14 +13,11 @@
         </div>
       </div>
       
-      <!-- Decorative elements -->
       <div class="decoration-circle bg-primary-subtle position-absolute"></div>
       <div class="decoration-dots position-absolute"></div>
     </div>
     
-    <!-- Quick Stats -->
     <div class="row g-4 mb-5">
-      <!-- Employees -->
       <div class="col-md-6 col-lg-3">
         <div class="stat-card bg-white shadow-sm rounded-4 p-4 h-100 border-start border-5 border-primary">
           <div class="d-flex align-items-center">
@@ -44,7 +40,6 @@
         </div>
       </div>
       
-      <!-- Departments -->
       <div class="col-md-6 col-lg-3">
         <div class="stat-card bg-white shadow-sm rounded-4 p-4 h-100 border-start border-5 border-success">
           <div class="d-flex align-items-center">
@@ -67,7 +62,6 @@
         </div>
       </div>
       
-      <!-- Workflows -->
       <div class="col-md-6 col-lg-3">
         <div class="stat-card bg-white shadow-sm rounded-4 p-4 h-100 border-start border-5 border-warning">
           <div class="d-flex align-items-center">
@@ -90,7 +84,6 @@
         </div>
       </div>
       
-      <!-- Requests -->
       <div class="col-md-6 col-lg-3">
         <div class="stat-card bg-white shadow-sm rounded-4 p-4 h-100 border-start border-5 border-info">
           <div class="d-flex align-items-center">
@@ -114,14 +107,11 @@
       </div>
     </div>
     
-    <!-- Recent Activity and Workflow Status -->
     <div class="row">
-      <!-- Recent Activity -->
       <div class="col-lg-7">
         <div class="bg-white shadow-sm rounded-4 p-4">
           <h5 class="mb-4"><i class="bi bi-activity me-2 text-primary"></i>Recent Activity</h5>
           
-          <!-- Loading State -->
           <div *ngIf="loading.workflows" class="text-center py-4">
             <div class="spinner-border spinner-border-sm text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -129,13 +119,11 @@
             <p class="text-muted mb-0 mt-2">Loading activities...</p>
           </div>
           
-          <!-- Empty State -->
           <div *ngIf="!loading.workflows && recentActivities.length === 0" class="text-center py-4">
             <i class="bi bi-calendar-x text-muted" style="font-size: 2rem;"></i>
             <p class="text-muted mb-0 mt-2">No recent activities found</p>
           </div>
           
-          <!-- Activity List -->
           <div class="activity-list" *ngIf="!loading.workflows && recentActivities.length > 0">
             <div class="activity-item d-flex mb-3 pb-3 border-bottom" *ngFor="let activity of recentActivities; let last = last" [class.mb-0]="last" [class.pb-0]="last" [class.border-0]="last">
               <div class="activity-icon {{activity.bgClass}} rounded-circle me-3">
@@ -150,12 +138,10 @@
         </div>
       </div>
       
-      <!-- Workflow Status -->
       <div class="col-lg-5 mt-4 mt-lg-0">
         <div class="bg-white shadow-sm rounded-4 p-4">
           <h5 class="mb-4"><i class="bi bi-kanban me-2 text-primary"></i>Workflow Status</h5>
           
-          <!-- Loading State -->
           <div *ngIf="loading.workflows" class="text-center py-4">
             <div class="spinner-border spinner-border-sm text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -163,15 +149,12 @@
             <p class="text-muted mb-0 mt-2">Loading workflow statistics...</p>
           </div>
           
-          <!-- Empty State -->
           <div *ngIf="!loading.workflows && totalWorkflows === 0" class="text-center py-4">
             <i class="bi bi-clipboard-x text-muted" style="font-size: 2rem;"></i>
             <p class="text-muted mb-0 mt-2">No workflows found</p>
           </div>
           
-          <!-- Workflow Stats -->
           <div *ngIf="!loading.workflows && totalWorkflows > 0">
-            <!-- Pending Workflows -->
             <div class="workflow-status mb-3 pb-3 border-bottom">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <span>Pending</span>
@@ -182,7 +165,6 @@
               </div>
             </div>
             
-            <!-- Approved Workflows -->
             <div class="workflow-status mb-3 pb-3 border-bottom">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <span>Approved</span>
@@ -193,7 +175,6 @@
               </div>
             </div>
             
-            <!-- Rejected Workflows -->
             <div class="workflow-status">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <span>Rejected</span>

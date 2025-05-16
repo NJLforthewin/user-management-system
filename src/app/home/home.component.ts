@@ -97,7 +97,6 @@ export class HomeComponent implements OnInit {
     }
 
     ngOnInit() {
-        // Mock data for demo
         setTimeout(() => {
             this.totalEmployees = 15;
             this.totalDepartments = 4;
@@ -117,21 +116,21 @@ export class HomeComponent implements OnInit {
                 {
                     id: 1,
                     title: 'New employee John Smith was added',
-                    timestamp: new Date(Date.now() - 7200000), // 2 hours ago
+                    timestamp: new Date(Date.now() - 7200000), 
                     bgClass: 'bg-primary',
                     icon: 'bi-person-plus'
                 },
                 {
                     id: 2,
                     title: 'Transfer request for Mike Johnson was approved',
-                    timestamp: new Date(Date.now() - 86400000), // 1 day ago
+                    timestamp: new Date(Date.now() - 86400000), 
                     bgClass: 'bg-success',
                     icon: 'bi-check-circle'
                 },
                 {
                     id: 3,
                     title: 'New onboarding workflow created',
-                    timestamp: new Date(Date.now() - 259200000), // 3 days ago
+                    timestamp: new Date(Date.now() - 259200000), 
                     bgClass: 'bg-warning',
                     icon: 'bi-exclamation-circle'
                 }
