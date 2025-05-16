@@ -19,7 +19,7 @@ export class AddEditComponent implements OnInit {
     isAddMode!: boolean;
     loading = false;
     submitted = false;
-    account: any = null; // Store the account data for use in the template
+    account: any = null; 
     
     constructor(
         private formBuilder: UntypedFormBuilder,
@@ -58,7 +58,6 @@ export class AddEditComponent implements OnInit {
     
     get f() { return this.form.controls; }
     
-    // Add these methods for activation and deletion
     toggleActivation(account: any) {
         if (confirm(`Are you sure you want to ${account.isActive ? 'deactivate' : 'activate'} this account?`)) {
             this.loading = true;
