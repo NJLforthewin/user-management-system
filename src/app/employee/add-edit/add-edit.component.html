@@ -27,49 +27,44 @@
                                 <div *ngIf="f.employeeId.errors.maxlength">Employee ID must be less than 20 characters</div>
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">First Name</label>
-                                <input type="text" formControlName="firstName" class="form-control" 
-                                       [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" />
-                                <div *ngIf="submitted && f.firstName.errors" class="invalid-feedback">
-                                    <div *ngIf="f.firstName.errors.required">First Name is required</div>
-                                    <div *ngIf="f.firstName.errors.maxlength">First Name must be less than 50 characters</div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Last Name</label>
-                                <input type="text" formControlName="lastName" class="form-control" 
-                                       [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" />
-                                <div *ngIf="submitted && f.lastName.errors" class="invalid-feedback">
-                                    <div *ngIf="f.lastName.errors.required">Last Name is required</div>
-                                    <div *ngIf="f.lastName.errors.maxlength">Last Name must be less than 50 characters</div>
-                                </div>
-                            </div>
-                        </div>
-                        
+                         
+                        <!-- Account selector -->
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" formControlName="email" class="form-control" 
-                                   [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
-                            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
-                                <div *ngIf="f.email.errors.email">Please enter a valid email address</div>
-                                <div *ngIf="f.email.errors.maxlength">Email must be less than 100 characters</div>
+                            <label class="form-label">Select Account</label>
+                            <select formControlName="accountId" class="form-select" 
+                                   [ngClass]="{ 'is-invalid': submitted && f.accountId.errors }">
+                                <option value="">-- Select Account --</option>
+                                <option *ngFor="let account of accounts" [value]="account.id">
+                                    {{account.firstName}} {{account.lastName}} ({{account.email}}) - {{account.role}} 
+                                    {{!account.isVerified ? '- Inactive' : ''}}
+                                </option>
+                            </select>
+                            <div *ngIf="submitted && f.accountId.errors" class="invalid-feedback">
+                                <div *ngIf="f.accountId.errors.required">Account selection is required</div>
                             </div>
+                            <small class="form-text text-muted">
+                                Select an account to associate with this employee
+                            </small>
                         </div>
-                        
+                    
                         <div class="mb-3">
                             <label class="form-label">Position</label>
-                            <input type="text" formControlName="position" class="form-control" 
-                                   [ngClass]="{ 'is-invalid': submitted && f.position.errors }" />
+                            <select formControlName="position" class="form-select" 
+                                   [ngClass]="{ 'is-invalid': submitted && f.position.errors }">
+                                <option value="">-- Select Position --</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Team Lead">Team Lead</option>
+                                <option value="Developer">Developer</option>
+                                <option value="Designer">Designer</option>
+                                <option value="QA Engineer">QA Engineer</option>
+                                <option value="HR Specialist">HR Specialist</option>
+                                <option value="Administrative Staff">Administrative Staff</option>
+                            </select>
                             <div *ngIf="submitted && f.position.errors" class="invalid-feedback">
                                 <div *ngIf="f.position.errors.required">Position is required</div>
-                                <div *ngIf="f.position.errors.maxlength">Position must be less than 100 characters</div>
                             </div>
                         </div>
-
+                        
                         <div class="mb-3">
                             <label class="form-label">Department</label>
                             <select formControlName="departmentId" class="form-select" 
@@ -93,24 +88,27 @@
                             </div>
                         </div>
                         
-                        <div class="mb-3" *ngIf="!isAddMode">
+                        <div class="mb-3">
                             <label class="form-label">Status</label>
                             <select formControlName="status" class="form-select" 
-                                   [ngClass]="{ 'is-invalid': submitted && f.status.errors }">
+                                   [ngClass]="{ 
+                                       'is-invalid': submitted && f.status.errors,
+                                       'border-success': form.value.status === 'Active',
+                                       'border-danger': form.value.status === 'Inactive'
+                                   }">
                                 <option value="Active">Active</option>
-                                <option value="On Leave">On Leave</option>
-                                <option value="Terminated">Terminated</option>
+                                <option value="Inactive">Inactive</option>
                             </select>
                             <div *ngIf="submitted && f.status.errors" class="invalid-feedback">
                                 <div *ngIf="f.status.errors.required">Status is required</div>
                             </div>
-                        </div>
+                        </div>  
                         
                         <div class="d-flex justify-content-between mt-4">
                             <a routerLink="/employee" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-1"></i>Back to Employees
                             </a>
-                            <button [disabled]="loading" class="btn btn-primary">
+                            <button type="submit" [disabled]="loading" class="btn btn-primary">
                                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
                                 <i *ngIf="!loading" class="bi bi-save me-1"></i>
                                 Save Employee

@@ -26,6 +26,7 @@
                                 <tr>
                                     <th>Employee ID</th>
                                     <th>Name</th>
+                                    <th>Email</th>
                                     <th>Position</th>
                                     <th>Department</th>
                                     <th>Status</th>
@@ -38,9 +39,10 @@
                                     <td>
                                         {{employee.account?.firstName}} {{employee.account?.lastName}}
                                     </td>
+                                    <td>{{employee.email}}</td>
                                     <td>{{employee.position}}</td>
                                     <td>{{employee.department?.name || 'N/A'}}</td>
-                                    <td>
+                                    <td>    
                                         <span [ngClass]="{
                                             'badge rounded-pill bg-info': employee.status === 'Active',
                                             'badge rounded-pill bg-warning text-dark': employee.status === 'On Leave',
