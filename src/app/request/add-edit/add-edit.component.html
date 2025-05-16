@@ -15,7 +15,7 @@
                         </div>
                         <p class="mt-2">Loading request details...</p>
                     </div>
-                    
+
                     <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
                         <div class="mb-3">
                             <label class="form-label">Employee</label>
@@ -52,7 +52,10 @@
                             <textarea formControlName="description" class="form-control" rows="3"></textarea>
                         </div>
                         
-                        <h4 class="mt-4 mb-3">Request Items</h4>
+                        <h4 class="mt-4 mb-3">
+                            Request Items
+                            <span class="badge bg-primary ms-2">{{items.length}} item(s)</span>
+                        </h4>
                         
                         <div formArrayName="items">
                             <div *ngFor="let item of items.controls; let i = index" class="card mb-3">
@@ -60,7 +63,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h5 class="mb-0">Item #{{i+1}}</h5>
                                         <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeItem(i)">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="bi bi-trash"></i> Remove
                                         </button>
                                     </div>
                                     
@@ -92,8 +95,8 @@
                             </div>
                         </div>
                         
-                        <button type="button" class="btn btn-outline-secondary w-100 mb-4" (click)="addItem()">
-                            <i class="bi bi-plus-circle me-1"></i>Add Item
+                        <button type="button" class="btn btn-outline-primary w-100 mb-4" (click)="addItem()">
+                            <i class="bi bi-plus-circle me-1"></i>Add Another Item
                         </button>
                         
                         <div class="d-flex justify-content-between mt-4">
@@ -103,7 +106,7 @@
                             <button [disabled]="loading" class="btn btn-primary">
                                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
                                 <i *ngIf="!loading" class="bi bi-save me-1"></i>
-                                Save Request
+                                {{isAddMode ? 'Submit Request' : 'Update Request'}}
                             </button>
                         </div>
                     </form>

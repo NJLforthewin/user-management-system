@@ -1,3 +1,4 @@
+<!-- src/app/employee/add-edit/add-edit.html -->
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8 offset-md-2">
@@ -27,30 +28,30 @@
                                 <div *ngIf="f.employeeId.errors.maxlength">Employee ID must be less than 20 characters</div>
                             </div>
                         </div>
-                         
-                        <!-- Account selector -->
+                        
                         <div class="mb-3">
                             <label class="form-label">Select Account</label>
                             <select formControlName="accountId" class="form-select" 
-                                   [ngClass]="{ 'is-invalid': submitted && f.accountId.errors }">
+                                [ngClass]="{ 'is-invalid': submitted && f.accountId.errors }">
                                 <option value="">-- Select Account --</option>
                                 <option *ngFor="let account of accounts" [value]="account.id">
-                                    {{account.firstName}} {{account.lastName}} ({{account.email}}) - {{account.role}} 
-                                    {{!account.isVerified ? '- Inactive' : ''}}
+                                    {{account.firstName}} {{account.lastName}} ({{account.email}}) - 
+                                    {{account.role === 'Admin' ? 'Admin' : 'User'}} 
+                                    {{isAccountActive(account) ? 'Active' : 'Inactive'}}
                                 </option>
                             </select>
                             <div *ngIf="submitted && f.accountId.errors" class="invalid-feedback">
                                 <div *ngIf="f.accountId.errors.required">Account selection is required</div>
                             </div>
                             <small class="form-text text-muted">
-                                Select an account to associate with this employee
+                                Only active accounts can be assigned to employees
                             </small>
                         </div>
-                    
+                        
                         <div class="mb-3">
                             <label class="form-label">Position</label>
                             <select formControlName="position" class="form-select" 
-                                   [ngClass]="{ 'is-invalid': submitted && f.position.errors }">
+                                [ngClass]="{ 'is-invalid': submitted && f.position.errors }">
                                 <option value="">-- Select Position --</option>
                                 <option value="Manager">Manager</option>
                                 <option value="Team Lead">Team Lead</option>
@@ -64,9 +65,9 @@
                                 <div *ngIf="f.position.errors.required">Position is required</div>
                             </div>
                         </div>
-                        
+                            
                         <div class="mb-3">
-                            <label class="form-label">Department</label>
+                            <label class="form-label">Department <span class="text-danger">*</span></label>
                             <select formControlName="departmentId" class="form-select" 
                                    [ngClass]="{ 'is-invalid': submitted && f.departmentId.errors }">
                                 <option value="">-- Select Department --</option>
@@ -77,6 +78,9 @@
                             <div *ngIf="submitted && f.departmentId.errors" class="invalid-feedback">
                                 <div *ngIf="f.departmentId.errors.required">Department is required</div>
                             </div>
+                            <small class="form-text text-muted">
+                                Department selection is required for all employees
+                            </small>
                         </div>
                         
                         <div class="mb-3">
@@ -92,9 +96,7 @@
                             <label class="form-label">Status</label>
                             <select formControlName="status" class="form-select" 
                                    [ngClass]="{ 
-                                       'is-invalid': submitted && f.status.errors,
-                                       'border-success': form.value.status === 'Active',
-                                       'border-danger': form.value.status === 'Inactive'
+                                       'is-invalid': submitted && f.status.errors
                                    }">
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
@@ -104,6 +106,7 @@
                             </div>
                         </div>  
                         
+
                         <div class="d-flex justify-content-between mt-4">
                             <a routerLink="/employee" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-1"></i>Back to Employees

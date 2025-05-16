@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, AbstractControl, Validators, ValidatorFn } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
 import { EmployeeService, DepartmentService, AlertService, AccountService } from '@app/_services';
@@ -76,7 +76,7 @@ export class AddEditComponent implements OnInit {
                 );
         }
     }
-    
+
     private loadDepartments() {
         this.departmentService.getAll()
             .pipe(first())
@@ -91,9 +91,32 @@ export class AddEditComponent implements OnInit {
             .pipe(first())
             .subscribe(
                 accounts => {
-                    this.accounts = accounts.sort((a, b) => {
-                        if (a.isVerified && !b.isVerified) return -1;
-                        if (!a.isVerified && b.isVerified) return 1;
+                    console.log('All accounts:', accounts);
+                    
+                    // Process accounts for display
+                    if (this.isAddMode) {
+                        // Only show active accounts for new employees
+                        this.accounts = accounts.filter(account => {
+                            // Check both isVerified and isActive if available
+                            const isAccountActive = account.isVerified && 
+                                                  (account.isActive === undefined || account.isActive === true);
+                            
+                            console.log(`Account ${account.email}: isVerified=${account.isVerified}, isActive=${account.isActive}, isAccountActive=${isAccountActive}`);
+                            
+                            return isAccountActive;
+                        });
+                    } else {
+                        // Show all accounts for editing
+                        this.accounts = accounts;
+                    }
+                    
+                    // Sort accounts (active first, then by role, then by name)
+                    this.accounts = this.accounts.sort((a, b) => {
+                        const aActive = a.isVerified && (a.isActive === undefined || a.isActive === true);
+                        const bActive = b.isVerified && (b.isActive === undefined || b.isActive === true);
+                        
+                        if (aActive && !bActive) return -1;
+                        if (!aActive && bActive) return 1;
                         
                         if (a.role === 'Admin' && b.role !== 'Admin') return -1;
                         if (a.role !== 'Admin' && b.role === 'Admin') return 1;
@@ -101,10 +124,15 @@ export class AddEditComponent implements OnInit {
                         return (a.firstName + ' ' + a.lastName).localeCompare(b.firstName + ' ' + b.lastName);
                     });
                     
-                    console.log('Loaded accounts:', this.accounts);
+                    console.log('Filtered accounts for display:', this.accounts);
                 },
                 error => this.alertService.error('Error loading accounts: ' + error)
             );
+    }
+    
+    // Helper to determine if an account is active
+    isAccountActive(account: Account): boolean {
+        return !!(account.isVerified && (account.isActive === undefined || account.isActive === true));
     }
     
     get f() { return this.form.controls; }
@@ -118,6 +146,15 @@ export class AddEditComponent implements OnInit {
         }
 
         const formData: any = { ...this.form.value };
+        
+        // Validate selected account is active
+        if (this.isAddMode) {
+            const selectedAccount = this.accounts.find(a => a.id == formData.accountId);
+            if (!selectedAccount || !this.isAccountActive(selectedAccount)) {
+                this.alertService.error('Only active accounts can be assigned to employees');
+                return;
+            }
+        }
         
         if (formData.status !== 'Active' && formData.status !== 'Inactive') {
             formData.status = 'Active';
@@ -135,8 +172,8 @@ export class AddEditComponent implements OnInit {
         this.employeeService.create(formData)
             .pipe(first())
             .subscribe(
-                () => {
-                    this.alertService.success('Employee added successfully', { keepAfterRouteChange: true });
+                (response) => {
+                    this.alertService.success('Employee added successfully with automatic onboarding workflow', { keepAfterRouteChange: true });
                     this.router.navigate(['../'], { relativeTo: this.route });
                 },
                 error => {

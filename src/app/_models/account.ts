@@ -12,6 +12,7 @@ export class Account {
     jwtToken?: string;
     refreshToken?: string;
     isVerified?: boolean;
+    isActive?: boolean;
     acceptTerms?: boolean;
     created?: Date;
     updated?: Date;

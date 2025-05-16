@@ -17,7 +17,7 @@
                     </div>
                     
                     <div *ngIf="!loading && employees.length === 0" class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>No employees found. Add your first employee to get started.
+                        <i class="bi bi-info-circle me-2"></i>No employees found.
                     </div>
                     
                     <div *ngIf="!loading && employees.length > 0" class="table-responsive">
@@ -34,23 +34,31 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let employee of employees">
-                                    <td><strong>{{employee.employeeId}}</strong></td>
-                                    <td>
-                                        {{employee.account?.firstName}} {{employee.account?.lastName}}
-                                    </td>
-                                    <td>{{employee.email}}</td>
-                                    <td>{{employee.position}}</td>
-                                    <td>{{employee.department?.name || 'N/A'}}</td>
-                                    <td>    
-                                        <span [ngClass]="{
-                                            'badge rounded-pill bg-info': employee.status === 'Active',
-                                            'badge rounded-pill bg-warning text-dark': employee.status === 'On Leave',
-                                            'badge rounded-pill bg-danger': employee.status === 'Terminated'
-                                        }">
-                                            {{employee.status}}
-                                        </span>
-                                    </td>
+                                        <tr *ngFor="let employee of employees">
+                                            <td><strong>{{employee.employeeId}}</strong></td>
+                                            <td>
+                                                {{employee.account?.firstName}} {{employee.account?.lastName}}
+                                            </td>
+                                            <td>{{employee.email}}</td>
+                                            <td>{{employee.position}}</td>
+                                            <td>{{employee.department?.name || 'N/A'}}</td>
+                                            <td>    
+                                                <span class="badge rounded-pill px-3 py-2 fw-normal" 
+                                                    [ngClass]="{
+                                                        'bg-success-subtle text-success border border-success': employee.status === 'Active',
+                                                        'bg-warning-subtle text-warning border border-warning': employee.status === 'On Leave',
+                                                        'bg-danger-subtle text-danger border border-danger': employee.status === 'Inactive' || employee.status === 'Terminated'
+                                                    }">
+                                                    <i class="bi" 
+                                                    [ngClass]="{
+                                                        'bi-check-circle-fill me-1': employee.status === 'Active',
+                                                        'bi-calendar-minus-fill me-1': employee.status === 'On Leave',
+                                                        'bi-x-circle-fill me-1': employee.status === 'Inactive' || employee.status === 'Terminated'
+                                                    }">
+                                                    </i>
+                                                    {{employee.status}}
+                                                </span>
+                                            </td>
                                     <td class="text-end">
                                         <a routerLink="details/{{employee.id}}" class="btn btn-sm btn-outline-primary me-1">
                                             <i class="bi bi-eye"></i>
