@@ -1,13 +1,6 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { Subscription } from 'rxjs';
-<<<<<<< HEAD
-
-import { Alert, AlertType } from '@app/_models';
-import { AlertService } from '@app/_services';
-
-@Component({ selector: 'alert', templateUrl: 'alert.component.html' })
-=======
 import { CommonModule } from '@angular/common';
 
 import { Alert, AlertType } from '../_models/alert';
@@ -19,39 +12,11 @@ import { AlertService } from '../_services/alert.service';
     standalone: true,
     imports: [CommonModule] 
 })
->>>>>>> 650f93b9451382bfbc24bef93c62680c8442fe72
 export class AlertComponent implements OnInit, OnDestroy {
     @Input() id = 'default-alert';
     @Input() fade = true;
 
     alerts: Alert[] = [];
-<<<<<<< HEAD
-    alertSubscription: Subscription;
-    routeSubscription: Subscription;
-
-    constructor(private router: Router, private alertService: AlertService) { }
-
-ngOnInit() {
-    // subscribe to new alert notifications
-    this.alertSubscription = this.alertService.onAlert(this.id)
-        .subscribe(alert => {
-            // clear alerts when an empty alert is received
-            if (!alert.message) {
-                // filter out alerts without 'keepAfterRouteChange' flag
-                this.alerts = this.alerts.filter(x => x.keepAfterRouteChange);
-
-                // remove 'keepAfterRouteChange' flag on the rest
-                this.alerts.forEach(x => delete x.keepAfterRouteChange);
-                return;
-            }
-
-            // add alert to array
-            this.alerts.push(alert);
-
-            // auto close alert if required
-            if (alert.autoClose) {
-                setTimeout(() => this.removeAlert(alert), 3000);
-=======
     alertSubscription!: Subscription;
     routeSubscription!: Subscription;
 
@@ -77,7 +42,6 @@ ngOnInit() {
         this.routeSubscription = this.router.events.subscribe(event => {
             if (event instanceof NavigationStart) {
                 this.alertService.clear(this.id);
->>>>>>> 650f93b9451382bfbc24bef93c62680c8442fe72
             }
         });
     }
@@ -101,9 +65,6 @@ ngOnInit() {
         }
     }
 
-<<<<<<< HEAD
-    return classes.join(' ');
-=======
     cssClass(alert: Alert) {
         if (!alert) return '';
 
@@ -125,6 +86,5 @@ ngOnInit() {
         }
 
         return classes.join(' ');
->>>>>>> 650f93b9451382bfbc24bef93c62680c8442fe72
     }
 }
