@@ -1,8 +1,192 @@
-<div class="p-4">
-  <div class="container">
-      <div class="bg-light p-4 rounded-3 text-center mb-4">
-          <h2 class="mb-2">Hi {{account.firstName}}!</h2>
-          <p class="text-muted">...</p>
+<div class="home-container">
+  <div class="container py-4">
+    <div class="welcome-card bg-white shadow-sm rounded-4 p-4 mb-5 position-relative overflow-hidden">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <h2 class="display-6 fw-bold text-primary mb-3">Hi {{account.firstName}}!</h2>
+          <p class="text-muted lead mb-4">WELCOME!!</p>
+        </div>
+        <div class="col-lg-4 d-none d-lg-block text-end">
+          <div class="welcome-illustration p-3">
+            <i class="bi bi-building text-primary-subtle" style="font-size: 8rem;"></i>
+          </div>
+        </div>
       </div>
+      
+      <div class="decoration-circle bg-primary-subtle position-absolute"></div>
+      <div class="decoration-dots position-absolute"></div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+      <div class="col-md-6 col-lg-3">
+        <div class="stat-card bg-white shadow-sm rounded-4 p-4 h-100 border-start border-5 border-primary">
+          <div class="d-flex align-items-center">
+            <div class="stat-icon bg-primary-subtle rounded-circle me-3">
+              <i class="bi bi-people text-primary"></i>
+            </div>
+            <div>
+              <h3 class="h5 mb-1">Employees</h3>
+              <div class="d-flex align-items-end">
+                <span *ngIf="!loading.employees" class="h3 mb-0 me-2">{{totalEmployees}}</span>
+                <span *ngIf="loading.employees" class="h3 mb-0 me-2">
+                  <i class="bi bi-three-dots"></i>
+                </span>
+                <small class="{{employeeGrowth > 0 ? 'text-success' : employeeGrowth < 0 ? 'text-danger' : 'text-warning'}}">
+                  <i class="bi {{employeeGrowth > 0 ? 'bi-arrow-up' : employeeGrowth < 0 ? 'bi-arrow-down' : 'bi-dash'}}"></i> {{employeeGrowth}}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-3">
+        <div class="stat-card bg-white shadow-sm rounded-4 p-4 h-100 border-start border-5 border-success">
+          <div class="d-flex align-items-center">
+            <div class="stat-icon bg-success-subtle rounded-circle me-3">
+              <i class="bi bi-building text-success"></i>
+            </div>
+            <div>
+              <h3 class="h5 mb-1">Departments</h3>
+              <div class="d-flex align-items-end">
+                <span *ngIf="!loading.departments" class="h3 mb-0 me-2">{{totalDepartments}}</span>
+                <span *ngIf="loading.departments" class="h3 mb-0 me-2">
+                  <i class="bi bi-three-dots"></i>
+                </span>
+                <small class="{{departmentGrowth > 0 ? 'text-success' : departmentGrowth < 0 ? 'text-danger' : 'text-warning'}}">
+                  <i class="bi {{departmentGrowth > 0 ? 'bi-arrow-up' : departmentGrowth < 0 ? 'bi-arrow-down' : 'bi-dash'}}"></i> {{departmentGrowth}}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-3">
+        <div class="stat-card bg-white shadow-sm rounded-4 p-4 h-100 border-start border-5 border-warning">
+          <div class="d-flex align-items-center">
+            <div class="stat-icon bg-warning-subtle rounded-circle me-3">
+              <i class="bi bi-kanban text-warning"></i>
+            </div>
+            <div>
+              <h3 class="h5 mb-1">Workflows</h3>
+              <div class="d-flex align-items-end">
+                <span *ngIf="!loading.workflows" class="h3 mb-0 me-2">{{totalWorkflows}}</span>
+                <span *ngIf="loading.workflows" class="h3 mb-0 me-2">
+                  <i class="bi bi-three-dots"></i>
+                </span>
+                <small class="{{workflowGrowth > 0 ? 'text-success' : workflowGrowth < 0 ? 'text-danger' : 'text-warning'}}">
+                  <i class="bi {{workflowGrowth > 0 ? 'bi-arrow-up' : workflowGrowth < 0 ? 'bi-arrow-down' : 'bi-dash'}}"></i> {{workflowGrowth}}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-3">
+        <div class="stat-card bg-white shadow-sm rounded-4 p-4 h-100 border-start border-5 border-info">
+          <div class="d-flex align-items-center">
+            <div class="stat-icon bg-info-subtle rounded-circle me-3">
+              <i class="bi bi-clipboard-check text-info"></i>
+            </div>
+            <div>
+              <h3 class="h5 mb-1">Requests</h3>
+              <div class="d-flex align-items-end">
+                <span *ngIf="!loading.requests" class="h3 mb-0 me-2">{{totalRequests}}</span>
+                <span *ngIf="loading.requests" class="h3 mb-0 me-2">
+                  <i class="bi bi-three-dots"></i>
+                </span>
+                <small class="{{requestGrowth > 0 ? 'text-success' : requestGrowth < 0 ? 'text-danger' : 'text-warning'}}">
+                  <i class="bi {{requestGrowth > 0 ? 'bi-arrow-up' : requestGrowth < 0 ? 'bi-arrow-down' : 'bi-dash'}}"></i> {{requestGrowth}}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-lg-7">
+        <div class="bg-white shadow-sm rounded-4 p-4">
+          <h5 class="mb-4"><i class="bi bi-activity me-2 text-primary"></i>Recent Activity</h5>
+          
+          <div *ngIf="loading.workflows" class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mb-0 mt-2">Loading activities...</p>
+          </div>
+          
+          <div *ngIf="!loading.workflows && recentActivities.length === 0" class="text-center py-4">
+            <i class="bi bi-calendar-x text-muted" style="font-size: 2rem;"></i>
+            <p class="text-muted mb-0 mt-2">No recent activities found</p>
+          </div>
+          
+          <div class="activity-list" *ngIf="!loading.workflows && recentActivities.length > 0">
+            <div class="activity-item d-flex mb-3 pb-3 border-bottom" *ngFor="let activity of recentActivities; let last = last" [class.mb-0]="last" [class.pb-0]="last" [class.border-0]="last">
+              <div class="activity-icon {{activity.bgClass}} rounded-circle me-3">
+                <i class="bi {{activity.icon}} text-white"></i>
+              </div>
+              <div>
+                <p class="mb-1">{{activity.title}}</p>
+                <small class="text-muted">{{formatTimeAgo(activity.timestamp)}}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-5 mt-4 mt-lg-0">
+        <div class="bg-white shadow-sm rounded-4 p-4">
+          <h5 class="mb-4"><i class="bi bi-kanban me-2 text-primary"></i>Workflow Status</h5>
+          
+          <div *ngIf="loading.workflows" class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mb-0 mt-2">Loading workflow statistics...</p>
+          </div>
+          
+          <div *ngIf="!loading.workflows && totalWorkflows === 0" class="text-center py-4">
+            <i class="bi bi-clipboard-x text-muted" style="font-size: 2rem;"></i>
+            <p class="text-muted mb-0 mt-2">No workflows found</p>
+          </div>
+          
+          <div *ngIf="!loading.workflows && totalWorkflows > 0">
+            <div class="workflow-status mb-3 pb-3 border-bottom">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Pending</span>
+                <span class="badge bg-warning px-3 py-2 rounded-pill">{{pendingWorkflows}}</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-warning" [style.width]="getPercentage(pendingWorkflows) + '%'"></div>
+              </div>
+            </div>
+            
+            <div class="workflow-status mb-3 pb-3 border-bottom">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Approved</span>
+                <span class="badge bg-success px-3 py-2 rounded-pill">{{approvedWorkflows}}</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success" [style.width]="getPercentage(approvedWorkflows) + '%'"></div>
+              </div>
+            </div>
+            
+            <div class="workflow-status">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Rejected</span>
+                <span class="badge bg-danger px-3 py-2 rounded-pill">{{rejectedWorkflows}}</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-danger" [style.width]="getPercentage(rejectedWorkflows) + '%'"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

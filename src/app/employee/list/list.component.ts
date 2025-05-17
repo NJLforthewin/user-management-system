@@ -31,9 +31,7 @@ export class ListComponent implements OnInit {
         .pipe(first())
         .subscribe(
             employees => {
-                // Process employees to ensure name properties
                 this.employees = employees.map(employee => {
-                    // If account data exists but direct name properties don't
                     if (employee.account && (!employee.firstName || !employee.lastName)) {
                         employee.firstName = employee.account.firstName;
                         employee.lastName = employee.account.lastName;

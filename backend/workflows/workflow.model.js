@@ -8,7 +8,7 @@ function model(sequelize) {
             type: DataTypes.STRING, 
             allowNull: false,
             validate: {
-                isIn: [['Onboarding', 'Transfer', 'Status Change', 'Termination']]
+                isIn: [['Onboarding', 'Transfer', 'Status Change', 'Termination', 'Request']]
             }
         },
         status: { 

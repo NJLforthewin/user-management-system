@@ -33,7 +33,6 @@ export class AddEditComponent implements OnInit {
     ngOnInit() {
         this.id = this.route.snapshot.params['id'];
         this.isAddMode = !this.id;
-        
         this.loadEmployees();
         
         this.form = this.formBuilder.group({
@@ -77,7 +76,6 @@ export class AddEditComponent implements OnInit {
                         } else {
                             this.addItem();
                         }
-                        
                         this.loading = false;
                     },
                     error => {
@@ -119,10 +117,14 @@ export class AddEditComponent implements OnInit {
 
     onSubmit() {
         this.submitted = true;
-
         this.alertService.clear();
 
         if (this.form.invalid) {
+            return;
+        }
+
+        if (this.items.length === 0) {
+            this.alertService.error('At least one item is required');
             return;
         }
 
@@ -138,8 +140,11 @@ export class AddEditComponent implements OnInit {
         this.requestService.create(this.form.value)
             .pipe(first())
             .subscribe(
-                () => {
-                    this.alertService.success('Request added successfully', { keepAfterRouteChange: true });
+                (response: any) => {
+                    this.alertService.success(
+                        `Request added successfully with ${this.items.length} item(s). A workflow has been automatically created with 'Pending' status.`, 
+                        { keepAfterRouteChange: true }
+                    );
                     this.router.navigate(['../'], { relativeTo: this.route });
                 },
                 error => {
@@ -148,7 +153,7 @@ export class AddEditComponent implements OnInit {
                 }
             );
     }
-
+    
     private updateRequest() {
         this.requestService.update(this.id, this.form.value)
             .pipe(first())

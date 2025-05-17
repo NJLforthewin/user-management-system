@@ -19,7 +19,6 @@
                     <div *ngIf="!loading && workflows.length === 0" class="alert alert-info">
                         <i class="bi bi-info-circle me-2"></i>No workflows found.
                     </div>
-                    
                     <div *ngIf="!loading && workflows.length > 0" class="table-responsive">
                         <table class="table table-hover">
                             <thead class="table-light">
@@ -42,11 +41,19 @@
                                         <span *ngIf="!workflow.employee" class="text-muted">Unknown</span>
                                     </td>
                                     <td>
-                                        <span [ngClass]="{
-                                            'badge bg-primary': workflow.status === 'Pending',
-                                            'badge bg-success': workflow.status === 'Approved',
-                                            'badge bg-danger': workflow.status === 'Rejected'
-                                        }">
+                                        <span class="badge rounded-pill px-3 py-2 fw-normal" 
+                                              [ngClass]="{
+                                                'bg-success-subtle text-success border border-success': workflow.status === 'Approved',
+                                                'bg-warning-subtle text-warning border border-warning': workflow.status === 'Pending',
+                                                'bg-danger-subtle text-danger border border-danger': workflow.status === 'Rejected'
+                                              }">
+                                            <i class="bi" 
+                                               [ngClass]="{
+                                                 'bi-check-circle-fill me-1': workflow.status === 'Approved',
+                                                 'bi-hourglass-split me-1': workflow.status === 'Pending',
+                                                 'bi-x-circle-fill me-1': workflow.status === 'Rejected'
+                                               }">
+                                            </i>
                                             {{workflow.status}}
                                         </span>
                                     </td>

@@ -13,27 +13,54 @@ router.put('/:id/status', authorize(Role.Admin), updateStatus);
 
 async function create(req, res, next) {
     try {
-        const request = await db.Request.create({
-            ...req.body,
-            employeeId: req.body.employeeId
+        const result = await db.sequelize.transaction(async (t) => {
+            const request = await db.Request.create({
+                ...req.body,
+                employeeId: req.body.employeeId,
+                status: 'Pending',
+                created: new Date()
+            }, { transaction: t });
+            
+            let createdItems = [];
+            if (req.body.items && req.body.items.length) {
+                const requestItems = req.body.items.map(item => ({
+                    ...item,
+                    requestId: request.id
+                }));
+                createdItems = await db.RequestItem.bulkCreate(requestItems, { transaction: t });
+            }
+            
+            const workflow = await db.Workflow.create({
+                type: 'Request',
+                status: 'Pending',
+                employeeId: req.body.employeeId,
+                details: {
+                    requestId: request.id,
+                    requestType: req.body.type,
+                    itemCount: createdItems.length,
+                    submittedDate: new Date()
+                },
+                created: new Date()
+            }, { transaction: t });
+            
+            return { request, workflow };
         });
         
-        if (req.body.items && req.body.items.length) {
-            const requestItems = req.body.items.map(item => ({
-                ...item,
-                requestId: request.id
-            }));
-            await db.RequestItem.bulkCreate(requestItems);
-        }
-        
-        const createdRequest = await db.Request.findByPk(request.id, {
+        const createdRequest = await db.Request.findByPk(result.request.id, {
             include: [
                 { model: db.Employee },
                 { model: db.RequestItem }
             ]
         });
         
-        res.status(201).json(createdRequest);
+        res.status(201).json({
+            ...createdRequest.toJSON(),
+            workflow: {
+                id: result.workflow.id,
+                type: result.workflow.type,
+                status: result.workflow.status
+            }
+        });
     } catch (err) { 
         next(err); 
     }
@@ -186,4 +213,5 @@ async function updateStatus(req, res, next) {
         next(err); 
     }
 }
+
 module.exports = router;

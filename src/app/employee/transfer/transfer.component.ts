@@ -17,9 +17,11 @@ export class TransferComponent implements OnInit {
     id!: number;
     employee!: Employee;
     departments: Department[] = [];
+    allEmployees: Employee[] = [];
     loading = true;
     submitting = false;
     submitted = false;
+    departmentCounts: { [key: string]: number } = {};
 
     constructor(
         private formBuilder: FormBuilder,
@@ -38,10 +40,9 @@ export class TransferComponent implements OnInit {
         });
         
         this.loadEmployeeDetails();
-        this.loadDepartments();
+        this.loadDepartmentsAndEmployees();
     }
     
-    // Add this method for the back button
     goBackToEmployees() {
         this.router.navigate(['/employee']);
     }
@@ -62,37 +63,73 @@ export class TransferComponent implements OnInit {
             );
     }
     
-    private loadDepartments() {
+    private loadDepartmentsAndEmployees() {
         this.departmentService.getAll()
             .pipe(first())
             .subscribe(
-                departments => this.departments = departments,
+                departments => {
+                    this.departments = departments;
+                    
+                    this.employeeService.getAll()
+                        .pipe(first())
+                        .subscribe(
+                            employees => {
+                                this.allEmployees = employees;
+                                
+                                departments.forEach(dept => {
+                                    if (dept.id !== undefined) {
+                                        const count = employees.filter(emp => emp.departmentId === dept.id).length;
+                                        this.departmentCounts[dept.id.toString()] = count;
+                                    }
+                                });
+                            },
+                            error => this.alertService.error('Error loading employees: ' + error)
+                        );
+                },
                 error => this.alertService.error('Error loading departments: ' + error)
             );
+    }
+
+    getDepartmentCount(departmentId: number): number {
+        return this.departmentCounts[departmentId.toString()] || 0;
     }
 
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
-
         this.alertService.clear();
 
         if (this.form.invalid) {
             return;
         }
 
-        if (this.employee.departmentId === parseInt(this.form.value.departmentId)) {
+        const newDepartmentId = parseInt(this.form.value.departmentId);
+        
+        if (this.employee.departmentId === newDepartmentId) {
             this.alertService.error('Employee is already in this department');
             return;
         }
         
         this.submitting = true;
-        this.employeeService.update(this.id, { departmentId: this.form.value.departmentId })
+        
+        // Use transfer method instead of update
+        this.employeeService.transfer(this.id, newDepartmentId)
             .pipe(first())
             .subscribe(
-                () => {
-                    this.alertService.success('Employee transferred successfully', { keepAfterRouteChange: true });
+                (response: any) => {
+                    this.alertService.success(
+                        `Employee transferred successfully. A workflow (ID: ${response.workflow?.id || 'N/A'}) has been created with 'Pending' status.`, 
+                        { keepAfterRouteChange: true }
+                    );
+                    
+                    // Update local department counts with the response data
+                    if (response.departmentCounts) {
+                        Object.keys(response.departmentCounts).forEach(deptId => {
+                            this.departmentCounts[deptId] = response.departmentCounts[deptId];
+                        });
+                    }
+                    
                     this.router.navigate(['../../details', this.id], { relativeTo: this.route });
                 },
                 error => {
